@@ -34,7 +34,12 @@ public class MoneyTabCompleter implements TabCompleter {
         }
 
         String commandType = args[0];
-        if(length == 2 && !(commandType.equals("순위") || commandType.equals("도움말")))
+        if(length == 2 && commandType.equals("확인")) {
+            if(player.isOp())
+                return NicknameAPI.getInstance().getPlayerNameAndNicknameList();
+        }
+
+        if(length == 3 && !(commandType.equals("순위") || commandType.equals("도움말")))
             return NicknameAPI.getInstance().getPlayerNameAndNicknameList();
 
         return Collections.emptyList();

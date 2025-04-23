@@ -3,9 +3,12 @@ package jiekie;
 import jiekie.command.CheckCommand;
 import jiekie.command.MoneyCommand;
 import jiekie.completer.MoneyTabCompleter;
+import jiekie.event.PlayerEvent;
+import jiekie.money.MoneyManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class EconomyPlugin extends JavaPlugin {
+    private MoneyManager moneyManager;
 
     @Override
     public void onEnable() {
@@ -14,6 +17,11 @@ public final class EconomyPlugin extends JavaPlugin {
         reloadConfig();
 
         // manager
+        moneyManager = new MoneyManager(this);
+        moneyManager.load();
+
+        // event
+        getServer().getPluginManager().registerEvents(new PlayerEvent(this), this);
 
         // command
         getCommand("돈").setExecutor(new MoneyCommand(this));
@@ -26,6 +34,12 @@ public final class EconomyPlugin extends JavaPlugin {
         getLogger().info("Copyright © 2025 Jiekie. All rights reserved.");
     }
 
+    public MoneyManager getMoneyManager() {
+        return moneyManager;
+    }
+
     @Override
-    public void onDisable() {}
+    public void onDisable() {
+        moneyManager.save();
+    }
 }
