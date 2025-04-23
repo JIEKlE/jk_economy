@@ -1,7 +1,7 @@
 package jiekie.event;
 
 import jiekie.EconomyPlugin;
-import jiekie.money.MoneyManager;
+import jiekie.manager.MoneyManager;
 import jiekie.util.SoundUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -53,7 +53,7 @@ public class PlayerEvent implements Listener {
 
         ItemMeta meta = item.getItemMeta();
         if(meta == null || !meta.hasDisplayName()) return;
-        if(meta.getCustomModelData() != 1) return;
+        if(meta.getCustomModelData() != 150) return;
 
         MoneyManager moneyManager = plugin.getMoneyManager();
         int amountOfMoney = moneyManager.getUnformattedMoney(meta.getDisplayName());

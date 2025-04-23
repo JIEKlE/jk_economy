@@ -1,7 +1,7 @@
 package jiekie.command;
 
 import jiekie.EconomyPlugin;
-import jiekie.money.MoneyManager;
+import jiekie.manager.MoneyManager;
 import jiekie.util.ChatUtil;
 import jiekie.util.SoundUtil;
 import org.bukkit.ChatColor;
@@ -89,7 +89,7 @@ public class CheckCommand implements CommandExecutor {
         ItemStack check = new ItemStack(Material.PAPER);
         ItemMeta meta = check.getItemMeta();
         meta.setDisplayName(ChatColor.RESET + moneyManager.getFormattedMoney(amountOfMoney));
-        meta.setCustomModelData(1);
+        meta.setCustomModelData(150);
         check.setItemMeta(meta);
         check.setAmount(amountOfItem);
         inventory.addItem(check);

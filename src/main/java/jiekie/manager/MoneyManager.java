@@ -1,4 +1,4 @@
-package jiekie.money;
+package jiekie.manager;
 
 import jiekie.EconomyPlugin;
 import jiekie.util.ChatUtil;

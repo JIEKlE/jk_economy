@@ -2,7 +2,7 @@ package jiekie.command;
 
 import jiekie.EconomyPlugin;
 import jiekie.api.NicknameAPI;
-import jiekie.money.MoneyManager;
+import jiekie.manager.MoneyManager;
 import jiekie.util.ChatUtil;
 import jiekie.util.PlayerNameData;
 import jiekie.util.SoundUtil;
@@ -25,62 +25,56 @@ public class MoneyCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(!(sender instanceof Player)) {
-            ChatUtil.notPlayer(sender);
-            return true;
-        }
-
-        Player player = (Player) sender;
         if(args == null || args.length == 0) {
-            ChatUtil.moneyCommandHelper(player);
+            ChatUtil.moneyCommandHelper(sender);
             return true;
         }
 
         switch(args[0]) {
             case "확인":
-                checkMoney(player, args);
+                checkMoney(sender, args);
                 break;
 
             case "송금":
-                payMoney(player, args);
+                payMoney(sender, args);
                 break;
 
             case "추가":
-                setMoney(player, args, "ADD");
+                setMoney(sender, args, "ADD");
                 break;
 
             case "차감":
-                setMoney(player, args, "SUBTRACT");
+                setMoney(sender, args, "SUBTRACT");
                 break;
 
             case "설정":
-                setMoney(player, args, "SET");
+                setMoney(sender, args, "SET");
                 break;
 
             case "순위":
-                moneyRank(player, args);
+                moneyRank(sender, args);
                 break;
 
             case "도움말":
-                ChatUtil.moneyCommandList(player);
+                ChatUtil.moneyCommandList(sender);
                 break;
 
             default:
-                ChatUtil.moneyCommandHelper(player);
+                ChatUtil.moneyCommandHelper(sender);
                 break;
         }
 
         return true;
     }
 
-    private void checkMoney(Player player, String[] args) {
-        Player targetPlayer = player;
+    private void checkMoney(CommandSender sender, String[] args) {
+        Player targetPlayer = (Player) sender;
         String targetPlayerName = targetPlayer.getName();
         UUID targetPlayerUuid = targetPlayer.getUniqueId();
 
         if(args.length > 1) {
-            if(!player.isOp()) {
-                ChatUtil.notOp(player);
+            if(!sender.isOp()) {
+                ChatUtil.notOp(sender);
                 return;
             }
 
@@ -101,11 +95,18 @@ public class MoneyCommand implements CommandExecutor {
         if(playerNameData != null)
             targetPlayerName = playerNameData.getNickname();
 
-        ChatUtil.checkMoney(player, targetPlayerName, formattedMoney);
-        SoundUtil.playNoteBlockBell((Player) player);
+        ChatUtil.checkMoney(sender, targetPlayerName, formattedMoney);
+        SoundUtil.playNoteBlockBell((Player) sender);
     }
 
-    private void payMoney(Player player, String[] args) {
+    private void payMoney(CommandSender sender, String[] args) {
+        // validation
+        if(!(sender instanceof Player)) {
+            ChatUtil.notPlayer(sender);
+            return;
+        }
+
+        Player player = (Player) sender;
         if(args.length < 3) {
             player.sendMessage(ChatUtil.wrongCommand() + " (/돈 송금 금액 플레이어ID|닉네임)");
             return;
@@ -134,6 +135,7 @@ public class MoneyCommand implements CommandExecutor {
             return;
         }
 
+        // pay
         UUID targetPlayerUuid = targetPlayer.getUniqueId();
         moneyManager.subtractMoney(playerUuid, amountOfMoney);
         moneyManager.addMoney(targetPlayerUuid, amountOfMoney);
@@ -151,14 +153,15 @@ public class MoneyCommand implements CommandExecutor {
         SoundUtil.playNoteBlockBell(targetPlayer);
     }
 
-    private void setMoney(Player player, String[] args, String operation) {
+    private void setMoney(CommandSender sender, String[] args, String operation) {
+        // validation
         if(args.length < 3) {
-            player.sendMessage(ChatUtil.wrongCommand() + " (/돈 추가|차감|설정 금액 플레이어ID|닉네임)");
+            sender.sendMessage(ChatUtil.wrongCommand() + " (/돈 추가|차감|설정 금액 플레이어ID|닉네임)");
             return;
         }
 
-        if(!player.isOp()) {
-            ChatUtil.notOp(player);
+        if(!sender.isOp()) {
+            ChatUtil.notOp(sender);
             return;
         }
 
@@ -166,43 +169,52 @@ public class MoneyCommand implements CommandExecutor {
         try {
             amountOfMoney = Integer.parseInt(args[1]);
         } catch (NumberFormatException e) {
-            ChatUtil.showErrorMessage(player, ChatUtil.INVALID_AMOUNT_OF_MONEY);
+            ChatUtil.showErrorMessage(sender, ChatUtil.INVALID_AMOUNT_OF_MONEY);
             return;
         }
 
         String targetPlayerName = getContents(args, 2);
         Player targetPlayer = NicknameAPI.getInstance().getPlayerByNameOrNickname(targetPlayerName);
         if(targetPlayer == null) {
-            ChatUtil.showErrorMessage(player, ChatUtil.PLAYER_NOT_FOUND);
+            ChatUtil.showErrorMessage(sender, ChatUtil.PLAYER_NOT_FOUND);
             return;
         }
 
         MoneyManager moneyManager = plugin.getMoneyManager();
         String formattedMoney = moneyManager.getFormattedMoney(amountOfMoney);
 
-        if(operation.equals("ADD")) {
+        // operation
+        if(operation.equals("ADD"))
             moneyManager.addMoney(targetPlayer.getUniqueId(), amountOfMoney);
-            ChatUtil.addMoney(player, targetPlayerName, formattedMoney);
-            ChatUtil.moneyIsAdded(targetPlayer, formattedMoney);
-
-        } else if(operation.equals("SUBTRACT")) {
+        else if(operation.equals("SUBTRACT"))
             moneyManager.subtractMoney(targetPlayer.getUniqueId(), amountOfMoney);
-            ChatUtil.subtractMoney(player, targetPlayerName, formattedMoney);
-            ChatUtil.moneyIsSubtracted(targetPlayer, formattedMoney);
-
-        } else if(operation.equals("SET")) {
+        else if(operation.equals("SET"))
             moneyManager.setMoney(targetPlayer.getUniqueId(), amountOfMoney);
-            ChatUtil.setMoney(player, targetPlayerName, formattedMoney);
-            ChatUtil.moneyIsSet(targetPlayer, formattedMoney);
-        }
 
-        SoundUtil.playNoteBlockBell(player);
-        SoundUtil.playNoteBlockBell(targetPlayer);
+        if(sender instanceof Player) {
+            // chat
+            if(operation.equals("ADD")) {
+                ChatUtil.addMoney(sender, targetPlayerName, formattedMoney);
+                ChatUtil.moneyIsAdded(targetPlayer, formattedMoney);
+
+            } else if(operation.equals("SUBTRACT")) {
+                ChatUtil.subtractMoney(sender, targetPlayerName, formattedMoney);
+                ChatUtil.moneyIsSubtracted(targetPlayer, formattedMoney);
+
+            } else if(operation.equals("SET")) {
+                ChatUtil.setMoney(sender, targetPlayerName, formattedMoney);
+                ChatUtil.moneyIsSet(targetPlayer, formattedMoney);
+            }
+
+            // sound effect
+            SoundUtil.playNoteBlockBell((Player) sender);
+            SoundUtil.playNoteBlockBell(targetPlayer);
+        }
     }
 
-    private void moneyRank(Player player, String[] args) {
-        if(!player.isOp()) {
-            ChatUtil.notOp(player);
+    private void moneyRank(CommandSender sender, String[] args) {
+        if(!sender.isOp()) {
+            ChatUtil.notOp(sender);
             return;
         }
 
@@ -211,7 +223,7 @@ public class MoneyCommand implements CommandExecutor {
             try {
                 page = Integer.parseInt(args[1]);
             } catch (NumberFormatException e) {
-                ChatUtil.showErrorMessage(player, ChatUtil.INVALID_PAGE);
+                ChatUtil.showErrorMessage(sender, ChatUtil.INVALID_PAGE);
                 return;
             }
         }
@@ -224,11 +236,11 @@ public class MoneyCommand implements CommandExecutor {
         int end = Math.min(start + pageSize, sortedMoneyList.size());
 
         if(start >= sortedMoneyList.size()) {
-            ChatUtil.showErrorMessage(player, ChatUtil.PAGE_DOES_NOT_EXIST);
+            ChatUtil.showErrorMessage(sender, ChatUtil.PAGE_DOES_NOT_EXIST);
             return;
         }
 
-        ChatUtil.rankMoneyPrefix(player);
+        ChatUtil.rankMoneyPrefix(sender);
 
         for(int i = start; i < end; i++) {
             UUID uuid = sortedMoneyList.get(i).getKey();
@@ -241,10 +253,10 @@ public class MoneyCommand implements CommandExecutor {
             if(playerNameData != null)
                 name = playerNameData.getNickname();
 
-            ChatUtil.rankMoney(player, rank, name, formattedMoney);
+            ChatUtil.rankMoney(sender, rank, name, formattedMoney);
         }
 
-        ChatUtil.rankMoneySuffix(player);
+        ChatUtil.rankMoneySuffix(sender);
     }
 
     private String getContents(String[] args, int startIndex) {
