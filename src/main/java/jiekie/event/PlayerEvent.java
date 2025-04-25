@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -44,7 +45,9 @@ public class PlayerEvent implements Listener {
     }
 
     private void removeCheck(PlayerInteractEvent e) {
-        if (!e.getHand().equals(EquipmentSlot.HAND)) return;
+        if(!e.getHand().equals(EquipmentSlot.HAND)) return;
+        if(e.getAction() != Action.RIGHT_CLICK_AIR  && e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+        
         Player player = e.getPlayer();
         PlayerInventory inventory = player.getInventory();
         ItemStack item = inventory.getItemInMainHand();

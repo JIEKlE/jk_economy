@@ -74,15 +74,19 @@ public class ChatUtil {
     }
 
     public static void rankMoneyPrefix(CommandSender sender) {
+        sender.sendMessage("");
         sender.sendMessage("─────────── 돈 순위 ───────────");
+        sender.sendMessage("");
     }
 
     public static void rankMoney(CommandSender sender, int rank, String name, String formattedMoney) {
-        sender.sendMessage("　　" + rank + "위. " + name + " (" + formattedMoney + ")");
+        sender.sendMessage("　　" + ChatColor.YELLOW + rank + "위. " + ChatColor.WHITE + name + " (" + formattedMoney + ")");
     }
 
     public static void rankMoneySuffix(CommandSender sender) {
+        sender.sendMessage("");
         sender.sendMessage("──────────────────────────");
+        sender.sendMessage("");
     }
 
     public static void createCheck(CommandSender sender) {

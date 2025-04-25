@@ -6,6 +6,8 @@ import jiekie.command.MoneyCommand;
 import jiekie.completer.MoneyTabCompleter;
 import jiekie.event.PlayerEvent;
 import jiekie.manager.MoneyManager;
+import jiekie.util.PacketNames;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class EconomyPlugin extends JavaPlugin {
@@ -33,6 +35,10 @@ public final class EconomyPlugin extends JavaPlugin {
 
         // placeholder
         new MoneyPlaceholder(this).register();
+
+        // packet
+        Bukkit.getMessenger().registerOutgoingPluginChannel(this, PacketNames.MONEY_UPDATE);
+        moneyManager.sendPacket();
 
         getLogger().info("경제 플러그인 by Jiekie");
         getLogger().info("Copyright © 2025 Jiekie. All rights reserved.");

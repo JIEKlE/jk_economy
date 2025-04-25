@@ -1,9 +1,14 @@
 package jiekie.manager;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import jiekie.EconomyPlugin;
 import jiekie.util.ChatUtil;
+import jiekie.util.PacketNames;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +27,23 @@ public class MoneyManager {
     public void load() {
         makeMoneyFile();
         loadPlayerMoney();
+    }
+
+    public void sendPacket() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for(Player player : Bukkit.getOnlinePlayers()) {
+                    ByteArrayDataOutput out = ByteStreams.newDataOutput();
+
+                    int money = getMoney(player.getUniqueId());
+                    String formattedMoney = getFormattedMoney(money);
+
+                    out.writeUTF(formattedMoney);
+                    player.sendPluginMessage(plugin, PacketNames.MONEY_UPDATE, out.toByteArray());
+                }
+            }
+        }.runTaskTimer(plugin, 0, 10L);
     }
 
     public boolean containsPlayer(UUID uuid) {
