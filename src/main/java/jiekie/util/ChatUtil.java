@@ -32,13 +32,20 @@ public class ChatUtil {
 
     public static String PAGE_DOES_NOT_EXIST = "해당 페이지는 존재하지 않습니다.";
     public static String PLAYER_NOT_FOUND = "해당 이름을 가진 플레이어를 찾을 수 없습니다.";
-    public static String NOT_ENOUGH_MONEY = "소지금이 입력한 금액보다 적습니다.";
+    public static String NOT_ENOUGH_MONEY = "소지금이 부족합니다.";
     public static String INVENTORY_FULL = "인벤토리가 가득 찼습니다. 인벤토리를 1칸 이상 비워주시기 바랍니다.";
     public static String SHOP_NOT_FOUND = "해당 이름을 가진 상점을 찾을 수 없습니다.";
     public static String SHOP_ALREADY_EXIST = "해당 상점은 이미 존재합니다.";
     public static String INVALID_SHOP_TYPE = "해당하는 상점 유형이 없습니다.";
+    public static String SHOP_DISABLED = "상점이 비활성화 된 상태입니다.";
+    public static String NO_PERMISSION = "필요한 권한이 없습니다.";
     public static String NOT_MARKET_SHOP = "해당 설정은 시세 상점일 경우에만 가능합니다.";
     public static String NO_ITEM_IN_SHOP = "상점에 설정된 물품이 없는 칸입니다.";
+
+    public static String BUY_NOT_ALLOWED = "구매할 수 없는 물품입니다.";
+    public static String SELL_NOT_ALLOWED = "판매할 수 없는 물품입니다.";
+    public static String OUT_OF_STOCK = "재고가 없습니다.";
+    public static String NO_ITEM_TO_SELL = "판매할 물품을 가지고 있지 않습니다.";
 
     public static String FAIL_TO_SAVE_MONEY_CONFIG = "money.yml 파일 저장에 실패했습니다.";
     public static String FAIL_TO_SAVE_SHOP_CONFIG = "shop.yml 파일 저장에 실패했습니다.";
@@ -156,6 +163,14 @@ public class ChatUtil {
         sender.sendMessage(getWarnPrefix() + "상점의 변동 주기를 설정했습니다.");
     }
 
+    public static void setGuiTemplate(CommandSender sender) {
+        sender.sendMessage(getWarnPrefix() + "상점의 GUI 템플릿을 설정했습니다.");
+    }
+
+    public static void resetGuiTemplate(CommandSender sender) {
+        sender.sendMessage(getWarnPrefix() + "상점의 GUI 템플릿을 해제했습니다.");
+    }
+
     public static void setItems(CommandSender sender) {
         sender.sendMessage(getWarnPrefix() + "상점의 물품 목록을 설정했습니다.");
     }
@@ -188,6 +203,10 @@ public class ChatUtil {
         sender.sendMessage(getWarnPrefix() + "상점의 물품을 기본 가격로 초기화했습니다.");
     }
 
+    public static void setShopItems(CommandSender sender) {
+        sender.sendMessage(getWarnPrefix() + "상점의 물품 목록을 설정했습니다.");
+    }
+
     public static void shopInfoPrefix(CommandSender sender) {
         sender.sendMessage("");
         sender.sendMessage("─────────── 상점정보 ───────────");
@@ -214,7 +233,7 @@ public class ChatUtil {
 
     public static void broadcastPriceChanged(String shopName) {
         Bukkit.broadcastMessage("");
-        Bukkit.broadcastMessage(getWarnPrefix()  + ChatColor.AQUA + "[ " + shopName + " ]" + ChatColor.WHITE + "의 시세가 변경되었습니다 !");
+        Bukkit.broadcastMessage(getWarnPrefix()  + ChatColor.AQUA + "[" + shopName + "]" + ChatColor.WHITE + "의 시세가 변경되었습니다 !");
         Bukkit.broadcastMessage("");
     }
 
@@ -284,27 +303,29 @@ public class ChatUtil {
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 상점을 열 수 있는 권한을 설정합니다. (공백일 경우 권한 해제)");
         sender.sendMessage("　　　⑦ /상점 변동주기설정 상점명 숫자(분)");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 상점의 시세 변동 주기를 설정합니다. (10분 단위로 설정)");
-        sender.sendMessage("　　　⑧ /상점 아이템설정 상점명");
+        sender.sendMessage("　　　⑧ /상점 템플릿설정 상점명 [템플릿ID]");
+        sender.sendMessage(ChatColor.GRAY + "　　　　　: 상점의 GUI 템플릿을 등록합니다. (공백일 경우 템플릿 해제)");
+        sender.sendMessage("　　　⑨ /상점 아이템설정 상점명");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 상점 인벤토리를 열어 구매·판매 물품을 설정합니다.");
-        sender.sendMessage("　　　⑨ /상점 구매가격설정 상점명 슬롯번호 기본가 [최고가] [최저가]");
+        sender.sendMessage("　　　⑩ /상점 구매가격설정 상점명 슬롯번호 기본가 [최고가] [최저가]");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 물품의 구매가격을 설정합니다. (0원으로 설정 시 구매 금지)");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 시세 상점일 경우 최고가와 최저가도 모두 설정해야 합니다.");
-        sender.sendMessage("　　　⑩ /상점 판매가격설정 상점명 슬롯번호 기본가 [최고가] [최저가]");
+        sender.sendMessage("　　　⑪ /상점 판매가격설정 상점명 슬롯번호 기본가 [최고가] [최저가]");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 물품의 판매가격을 설정합니다. (0원으로 설정 시 판매 금지)");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 시세 상점일 경우 최고가와 최저가도 모두 설정해야 합니다.");
-        sender.sendMessage("　　　⑪ /상점 재고설정 상점명 슬롯번호 재고");
+        sender.sendMessage("　　　⑫ /상점 재고설정 상점명 슬롯번호 재고");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 물품의 재고를 설정합니다. (0으로 설정 시 무제한)");
-        sender.sendMessage("　　　⑫ /상점 최대변동룰설정 상점명 슬롯번호 숫자(%)");
+        sender.sendMessage("　　　⑬ /상점 최대변동률설정 상점명 슬롯번호 숫자(%)");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 물품의 최대 시세 변동률을 설정합니다.");
-        sender.sendMessage("　　　⑬ /상점 재고초기화 상점명");
+        sender.sendMessage("　　　⑭ /상점 재고초기화 상점명");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 상점의 재고를 보충합니다.");
-        sender.sendMessage("　　　⑭ /상점 아이템초기화 상점명");
+        sender.sendMessage("　　　⑮ /상점 아이템초기화 상점명");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 물품 목록을 초기화합니다.");
-        sender.sendMessage("　　　⑮ /상점 가격초기화 상점명");
+        sender.sendMessage("　　　⑯ /상점 가격초기화 상점명");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 물품의 가격을 기본가로 초기화합니다.");
-        sender.sendMessage("　　　⑯ /상점 정보 상점명");
+        sender.sendMessage("　　　⑰ /상점 정보 상점명");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 물품의 가격을 기본가로 초기화합니다.");
-        sender.sendMessage("　　　⑰ /상점 도움말");
+        sender.sendMessage("　　　⑱ /상점 도움말");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 사용 가능한 명령어를 확인할 수 있습니다.");
     }
 }

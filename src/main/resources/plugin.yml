@@ -4,7 +4,7 @@ main: jiekie.EconomyPlugin
 api-version: '1.20'
 authors: [Jiekie]
 description: 경제 플러그인
-depend: [jk_nickname, PlaceholderAPI, ItemsAdder]
+depend: [jk_nickname, PlaceholderAPI]
 commands:
   돈:
     description: 돈 설정 명령어

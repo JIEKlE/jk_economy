@@ -29,9 +29,9 @@ public class ShopTabCompleter implements TabCompleter {
         int length = args.length;
         if(length == 1) {
             return Arrays.asList("열기", "생성", "제거", "활성화", "비활성화"
-                    , "인벤토리수설정", "권한설정", "변동주기설정", "아이템설정", "구매가격설정"
-                    , "판매가격설정", "재고설정", "최대변동룰설정", "재고초기화", "아이템초기화"
-                    , "가격초기화", "정보", "도움말");
+                    , "인벤토리수설정", "권한설정", "변동주기설정", "템플릿설정", "아이템설정"
+                    , "구매가격설정", "판매가격설정", "재고설정", "최대변동률설정", "재고초기화"
+                    , "아이템초기화", "가격초기화", "정보", "도움말");
         }
 
         String commandType = args[0];
@@ -53,6 +53,9 @@ public class ShopTabCompleter implements TabCompleter {
 
             if(commandType.equals("변동주기설정"))
                 return Arrays.asList("30", "60", "90");
+
+            if(commandType.equals("템플릿설정"))
+                return Arrays.asList("템플릿ID");
 
             if(commandType.equals("구매가격설정") || commandType.equals("판매가격설정") || commandType.equals("재고설정") || commandType.equals("최대변동룰설정"))
                 return Arrays.asList("슬롯번호");

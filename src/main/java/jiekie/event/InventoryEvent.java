@@ -1,0 +1,206 @@
+package jiekie.event;
+
+import jiekie.EconomyPlugin;
+import jiekie.exception.ShopException;
+import jiekie.model.ShopInventoryHolder;
+import jiekie.model.ShopItem;
+import jiekie.util.ChatUtil;
+import jiekie.util.SoundUtil;
+import org.bukkit.Material;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
+
+public class InventoryEvent implements Listener {
+    private final EconomyPlugin plugin;
+
+    public InventoryEvent(EconomyPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent e) {
+        onShopInventoryClick(e);
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent e) {
+        onShopInventoryClose(e);
+    }
+
+    private void onShopInventoryClick(InventoryClickEvent e) {
+        HumanEntity humanEntity = e.getWhoClicked();
+        if(humanEntity == null || !(humanEntity instanceof Player)) return;
+        Player player = (Player) humanEntity;
+
+        Inventory inventory = e.getClickedInventory();
+        if(inventory == null) return;
+        if(!(inventory.getHolder() instanceof ShopInventoryHolder)) return;
+
+        ShopInventoryHolder holder = (ShopInventoryHolder) inventory.getHolder();
+        if(holder.isSettingMode()) return;
+
+        e.setCancelled(true);
+
+        ItemStack item = e.getCurrentItem();
+        if(item == null || item.getType() == Material.AIR) return;
+
+        try {
+            ShopItem shopItem = plugin.getShopManager().getShopItemOrThrow(holder.getName(), e.getSlot());
+
+            boolean shiftClick = e.isShiftClick();
+            boolean rightClick = e.getClick().isRightClick();
+
+            if(rightClick)
+                handleSell(player, shopItem, shiftClick);
+            else
+                handleBuy(player, shopItem, shiftClick);
+
+            plugin.getShopManager().setInventoryForTrade(inventory, holder.getName());
+
+        } catch (ShopException ex) {
+            ChatUtil.showErrorMessage(player, ex.getMessage());
+        }
+    }
+
+    private void handleBuy(Player player, ShopItem shopItem, boolean shiftClick) {
+        if(shopItem.getCurrentBuyPrice() <= 0) {
+            ChatUtil.showErrorMessage(player, ChatUtil.BUY_NOT_ALLOWED);
+            return;
+        }
+
+        if(player.getInventory().firstEmpty() == -1) {
+            ChatUtil.showErrorMessage(player, ChatUtil.INVENTORY_FULL);
+            return;
+        }
+
+        int amountOfItem = shiftClick ? 64 : 1;
+        if(shopItem.getMaxStock() > 0) {
+            int available = shopItem.getAvailableStock();
+            if(available < amountOfItem)
+                amountOfItem = available;
+
+            if(amountOfItem == 0) {
+                ChatUtil.showErrorMessage(player, ChatUtil.OUT_OF_STOCK);
+                return;
+            }
+        }
+
+        int totalCost = shopItem.getCurrentBuyPrice() * amountOfItem;
+        if(plugin.getMoneyManager().getMoney(player.getUniqueId()) < totalCost) {
+            ChatUtil.showErrorMessage(player, ChatUtil.NOT_ENOUGH_MONEY);
+            return;
+        }
+
+        plugin.getMoneyManager().subtractMoney(player.getUniqueId(), totalCost);
+        player.getInventory().addItem(createItem(shopItem.getItem(), amountOfItem));
+
+        if(shopItem.getMaxStock() > 0)
+            shopItem.setAvailableStock(shopItem.getAvailableStock() - amountOfItem);
+
+        SoundUtil.playNoteBlockBell(player);
+    }
+
+    private ItemStack createItem(ItemStack item, int amount) {
+        ItemStack clone = item.clone();
+        clone.setAmount(amount);
+        return clone;
+    }
+
+    private void handleSell(Player player, ShopItem shopItem, boolean shiftClick) {
+        if(shopItem.getCurrentSellPrice() <= 0) {
+            ChatUtil.showErrorMessage(player, ChatUtil.SELL_NOT_ALLOWED);
+            return;
+        }
+
+        int amountOfItem = shiftClick ? 64 : 1;
+        int count = countItem(player.getInventory(), shopItem.getItem());
+
+        if(count < amountOfItem)
+            amountOfItem = count;
+
+        if(amountOfItem == 0) {
+            ChatUtil.showErrorMessage(player, ChatUtil.NO_ITEM_TO_SELL);
+            return;
+        }
+
+        removeItem(player.getInventory(), shopItem.getItem(), amountOfItem);
+        int totalCost = shopItem.getCurrentSellPrice() * amountOfItem;
+        plugin.getMoneyManager().addMoney(player.getUniqueId(), totalCost);
+
+        SoundUtil.playNoteBlockBell(player);
+    }
+
+    private int countItem(Inventory inventory, ItemStack target) {
+        int count = 0;
+
+        for(ItemStack item : inventory.getContents()) {
+            if(!isSameItem(item, target)) continue;
+            count += item.getAmount();
+        }
+
+        return count;
+    }
+
+    private void removeItem(Inventory inventory, ItemStack target, int amount) {
+        for(ItemStack item : inventory.getContents()) {
+            if(!isSameItem(item, target)) continue;
+            int toRemove = Math.min(item.getAmount(), amount);
+            item.setAmount(item.getAmount() - toRemove);
+            amount -= toRemove;
+            if(amount <= 0) break;
+        }
+    }
+
+    private boolean isSameItem(ItemStack a, ItemStack b) {
+        if(a == null || b == null) return false;
+        if(a.getType() != b.getType()) return false;
+
+        ItemMeta metaA = a.getItemMeta();
+        ItemMeta metaB = b.getItemMeta();
+
+        if(metaA == null && metaB == null) return true;
+        if(metaA == null || metaB == null) return false;
+
+        if(metaA.hasDisplayName() != metaB.hasDisplayName()) return false;
+        if(metaA.hasDisplayName() && !metaA.getDisplayName().equals(metaB.getDisplayName())) return false;
+
+        if(metaA.hasCustomModelData() != metaB.hasCustomModelData()) return false;
+        if(metaA.hasCustomModelData() && metaA.getCustomModelData() != metaB.getCustomModelData()) return false;
+
+        if(!(metaA instanceof Damageable) || !(metaB instanceof Damageable)) return true;
+        Damageable damageableA = (Damageable) metaA;
+        Damageable damageableB = (Damageable) metaB;
+        if(damageableA.getDamage() != damageableB.getDamage()) return false;
+
+        return true;
+    }
+
+    private void onShopInventoryClose(InventoryCloseEvent e) {
+        Inventory inventory = e.getInventory();
+        if(!(inventory.getHolder() instanceof ShopInventoryHolder)) return;
+
+        ShopInventoryHolder holder = (ShopInventoryHolder) inventory.getHolder();
+        if(!holder.isSettingMode()) return;
+
+        HumanEntity humanEntity = e.getPlayer();
+        if(humanEntity == null || !(humanEntity instanceof Player)) return;
+        Player player = (Player) humanEntity;
+
+        try {
+            plugin.getShopManager().setShopItems(holder.getName(), inventory);
+            ChatUtil.setShopItems(player);
+            SoundUtil.playNoteBlockBell(player);
+
+        } catch (ShopException ex) {
+            ChatUtil.showErrorMessage(player, ex.getMessage());
+        }
+    }
+}

@@ -3,13 +3,20 @@ package jiekie.manager;
 import jiekie.EconomyPlugin;
 import jiekie.exception.ShopException;
 import jiekie.model.Shop;
+import jiekie.model.ShopInventoryHolder;
 import jiekie.model.ShopItem;
 import jiekie.model.ShopType;
 import jiekie.util.ChatUtil;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
@@ -18,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.*;
 
 public class ShopManager {
@@ -58,7 +66,7 @@ public class ShopManager {
             shop.setEnabled(shopSection.getBoolean(name + ".enabled"));
             shop.setEnglishPermission(shopSection.getString(name + ".english_permission", null));
             shop.setKoreanPermission(shopSection.getString(name + ".korean_permission", null));
-            shop.setGuiTemplate(shopSection.getString(name + ".gui_template", null));
+            shop.setTemplateId(shopSection.getString(name + ".template_id", null));
 
             if(type == ShopType.MARKET) {
                 int interval = shopSection.getInt(name + ".interval");
@@ -83,7 +91,6 @@ public class ShopManager {
                 // 아이템 설정
                 String itemData = itemSection.getString(slot + ".item");
                 ShopItem shopItem = new ShopItem(itemFromBase64(itemData));
-                shopItem.setItemsAdderId(itemSection.getString(slot + ".items_adder_id", null));
                 shopItem.setCurrentBuyPrice(itemSection.getInt(slot + ".current_buy_price"));
                 shopItem.setCurrentSellPrice(itemSection.getInt(slot + ".current_sell_price"));
                 shopItem.setMaxStock(itemSection.getInt(slot + ".max_stock"));
@@ -118,6 +125,7 @@ public class ShopManager {
             public void run() {
                 for(Shop shop : shopMap.values()) {
                     if(shop.getType() != ShopType.MARKET) continue;
+                    if(!shop.isEnabled()) continue;
                     if(!shop.shouldUpdateNow()) continue;
 
                     for(ShopItem item : shop.getItems().values())
@@ -127,12 +135,136 @@ public class ShopManager {
                     shop.scheduleNextUpdate();
                 }
             }
-        }.runTaskTimer(plugin, 0, 20L * 60 * 10);
+        }.runTaskTimer(plugin, 0, 20L * 60);
     }
 
     /* function */
-    public void openShop(Player player, String name) {
+    public void openShop(Player player, String name, boolean isSettingMode) throws ShopException {
+        Shop shop = getShopOrThrow(name);
+        if(!shop.isEnabled())
+            throw new ShopException(ChatUtil.SHOP_DISABLED);
 
+        String englishPermission = shop.getEnglishPermission();
+        if(englishPermission != null && !player.hasPermission(englishPermission))
+            throw new ShopException(ChatUtil.NO_PERMISSION);
+
+        String templateId = shop.getTemplateId();
+        String chestName = templateId == null ? "" : ":offset_-16::" + templateId + ":";
+        int size = shop.getSize();
+
+        ShopInventoryHolder holder = new ShopInventoryHolder(name, isSettingMode);
+        Inventory inventory = Bukkit.createInventory(holder, size, chestName);
+
+        Map<Integer, ShopItem> items = shop.getItems();
+        if(isSettingMode)
+            setInventoryForSetting(inventory, name);
+        else
+            setInventoryForTrade(inventory, name);
+
+        player.openInventory(inventory);
+    }
+
+    public void setInventoryForSetting(Inventory inventory, String name) throws ShopException {
+        Shop shop = getShopOrThrow(name);
+        Map<Integer, ShopItem> items = shop.getItems();
+
+        if(items == null || items.isEmpty()) {
+            return;
+        }
+
+        items.forEach((slot, item) -> {
+            ItemStack slotItem = item.getItem().clone();
+            inventory.setItem(slot, slotItem);
+        });
+    }
+
+    public void setInventoryForTrade(Inventory inventory, String name) throws ShopException {
+        Shop shop = getShopOrThrow(name);
+        Map<Integer, ShopItem> items = shop.getItems();
+        ShopType type = shop.getType();
+
+        if(items == null || items.isEmpty()) {
+            return;
+        }
+
+        for(int i=0 ; i<inventory.getSize() ; i++) {
+            inventory.setItem(i, null);
+            if(!items.containsKey(i)) continue;
+
+            ShopItem shopItem = items.get(i);
+            ItemStack slotItem = shopItem.getItem().clone();
+            ItemMeta meta = slotItem.getItemMeta();
+
+            meta.setLore(buildShopItemLore(shopItem, type));
+            slotItem.setItemMeta(meta);
+
+            inventory.setItem(i, slotItem);
+        }
+    }
+
+    private List<String> buildShopItemLore(ShopItem item, ShopType type) {
+        List<String> lore = new ArrayList<>();
+
+        lore.add("");
+        lore.add(buildBuyPriceLore(item, type));
+        lore.add(buildSellPriceLore(item, type));
+        lore.add("");
+        lore.add(buildOneStackBuyPrice(item));
+        lore.add(buildOneStackSellPrice(item));
+        lore.add("");
+
+        if(item.getMaxStock() > 0) {
+            lore.add(ChatColor.GOLD + "남은 수량" + ChatColor.WHITE + " : " + item.getAvailableStock() + " / " + item.getMaxStock());
+            lore.add("");
+        }
+
+        lore.add(ChatColor.DARK_GRAY + "좌클릭 : 구매");
+        lore.add(ChatColor.DARK_GRAY + "우클릭 : 판매");
+        lore.add(ChatColor.DARK_GRAY + "shift + 좌클릭 : 64개 구매 or 전체 수량");
+        lore.add(ChatColor.DARK_GRAY + "shift + 우클릭 : 64개 판매 or 전체 판매");
+
+        return lore;
+    }
+
+    private String buildBuyPriceLore(ShopItem item, ShopType type) {
+        String buyPrice = (item.getCurrentBuyPrice() > 0) ? getFormattedPrice(item.getCurrentBuyPrice()) : "구매금지";
+        if(type == ShopType.MARKET && item.getCurrentBuyPrice() > 0) {
+            buyPrice += " " + formatFluctuation(item.getBuyFluctuationPercent());
+        }
+
+        return ChatColor.LIGHT_PURPLE + "구매가격" + ChatColor.WHITE + " : " + buyPrice;
+    }
+
+    private String buildSellPriceLore(ShopItem item, ShopType type) {
+        String sellPrice = (item.getCurrentSellPrice() > 0) ? getFormattedPrice(item.getCurrentSellPrice()) : "판매금지";
+        if(type == ShopType.MARKET && item.getCurrentSellPrice() > 0) {
+            sellPrice += " " + formatFluctuation(item.getSellFluctuationPercent());
+        }
+
+        return ChatColor.AQUA + "판매가격" + ChatColor.WHITE + " : " + sellPrice;
+    }
+
+    private String buildOneStackBuyPrice(ShopItem item) {
+        String buyPrice = (item.getCurrentBuyPrice() > 0) ? getFormattedPrice(item.getCurrentBuyPrice() * 64) : "구매금지";
+        return ChatColor.LIGHT_PURPLE + "64개 구매가격" + ChatColor.WHITE + " : " + buyPrice;
+    }
+
+    private String buildOneStackSellPrice(ShopItem item) {
+        String sellPrice = (item.getCurrentSellPrice() > 0) ? getFormattedPrice(item.getCurrentSellPrice() * 64) : "판매금지";
+        return ChatColor.AQUA + "64개 판매가격" + ChatColor.WHITE + " : " + sellPrice;
+    }
+
+    private String formatFluctuation(int fluctuation) {
+        if(fluctuation > 0) return ChatColor.GREEN + "[ ▲ " + fluctuation + "% ]";
+        if(fluctuation == 0) return ChatColor.YELLOW + "[ - ]";
+        if(fluctuation < 0) return ChatColor.RED + "[ ▼ " + fluctuation + "% ]";
+        return "";
+    }
+
+    public String getFormattedPrice(int price) {
+        NumberFormat formatter = NumberFormat.getInstance(Locale.KOREA);
+        formatter.setMaximumFractionDigits(0);
+        return formatter.format(price) + "원";
     }
 
     public void createShop(String name, String typeDisplayName, String sizeString) throws ShopException {
@@ -159,6 +291,8 @@ public class ShopManager {
     public void activateShop(String name, boolean activate) throws ShopException {
         Shop shop = getShopOrThrow(name);
         shop.setEnabled(activate);
+        if(activate)
+            shop.scheduleNextUpdate();
     }
 
     public void setInventorySize(String name, String sizeString) throws ShopException {
@@ -170,9 +304,11 @@ public class ShopManager {
         Map<Integer, ShopItem> items = shop.getItems();
         if(items == null || items.isEmpty()) return;
 
+        List<Integer> removeList = new ArrayList<>();
         items.forEach((slot, item) -> {
-            if(slot > size) items.remove(slot);
+            if(slot > size) removeList.add(slot);
         });
+        removeList.forEach(items::remove);
     }
 
     public void setPermission(String name, String englishPermission, String koreanPermission) throws ShopException {
@@ -188,6 +324,11 @@ public class ShopManager {
 
         int interval = getIntervalFromString(intervalString);
         shop.setInterval(interval);
+    }
+
+    public void setGuiTemplate(String name, String templateId) throws ShopException {
+        Shop shop = getShopOrThrow(name);
+        shop.setTemplateId(templateId);
     }
 
     public void setBuyPrice(String[] args) throws ShopException {
@@ -280,6 +421,59 @@ public class ShopManager {
         });
     }
 
+    public void setShopItems(String name, Inventory inventory) throws ShopException {
+        Shop shop = getShopOrThrow(name);
+        Map<Integer, ShopItem> items = shop.getItems();
+        if(items == null)
+            items = new HashMap<>();
+
+        List<Integer> removeList = new ArrayList<>();
+        for(int i=0 ; i<inventory.getSize() ; i++) {
+            ItemStack item = inventory.getItem(i);
+            if(item == null || item.getType() == Material.AIR) {
+                if(items.containsKey(i)) removeList.add(i);
+                continue;
+            }
+
+            ShopItem existingShopItem = items.get(i);
+            if(existingShopItem != null && isSameItem(item, existingShopItem.getItem())) continue;
+
+            ItemStack slotItem = item.clone();
+            slotItem.setAmount(1);
+
+            ShopItem shopItem = new ShopItem(slotItem);
+            items.put(i, shopItem);
+        }
+
+        removeList.forEach(items::remove);
+
+        shop.setItems(items);
+    }
+
+    private boolean isSameItem(ItemStack a, ItemStack b) {
+        if(a == null || b == null) return false;
+        if(a.getType() != b.getType()) return false;
+
+        ItemMeta metaA = a.getItemMeta();
+        ItemMeta metaB = b.getItemMeta();
+
+        if(metaA == null && metaB == null) return true;
+        if(metaA == null || metaB == null) return false;
+
+        if(metaA.hasDisplayName() != metaB.hasDisplayName()) return false;
+        if(metaA.hasDisplayName() && !metaA.getDisplayName().equals(metaB.getDisplayName())) return false;
+
+        if(metaA.hasCustomModelData() != metaB.hasCustomModelData()) return false;
+        if(metaA.hasCustomModelData() && metaA.getCustomModelData() != metaB.getCustomModelData()) return false;
+
+        if(!(metaA instanceof Damageable) || !(metaB instanceof Damageable)) return true;
+        Damageable damageableA = (Damageable) metaA;
+        Damageable damageableB = (Damageable) metaB;
+        if(damageableA.getDamage() != damageableB.getDamage()) return false;
+
+        return true;
+    }
+
     public Shop getShopOrThrow(String name) throws ShopException {
         if(!shopMap.containsKey(name))
             throw new ShopException(ChatUtil.SHOP_NOT_FOUND);
@@ -289,6 +483,19 @@ public class ShopManager {
             throw new ShopException(ChatUtil.SHOP_NOT_FOUND);
 
         return shop;
+    }
+
+    public ShopItem getShopItemOrThrow(String name, int slot) throws ShopException {
+        Shop shop = getShopOrThrow(name);
+        Map<Integer, ShopItem> items = shop.getItems();
+
+        if(items == null || items.isEmpty())
+            throw new ShopException(ChatUtil.NO_ITEM_IN_SHOP);
+
+        if(!items.containsKey(slot))
+            throw new ShopException(ChatUtil.NO_ITEM_IN_SHOP);
+
+        return items.get(slot);
     }
 
     private int getInventorySizeFromString(String sizeString) throws ShopException {
@@ -423,7 +630,7 @@ public class ShopManager {
             config.set(path + ".enabled", shop.isEnabled());
             config.set(path + ".english_permission", shop.getEnglishPermission());
             config.set(path + ".korean_permission", shop.getKoreanPermission());
-            config.set(path + ".gui_template", shop.getGuiTemplate());
+            config.set(path + ".template_id", shop.getTemplateId());
 
             if(type == ShopType.MARKET)
                 config.set(path + ".interval", shop.getInterval());
@@ -450,7 +657,6 @@ public class ShopManager {
                 String path = basePath + "." + slot;
 
                 config.set(path + ".item", itemStackToBase64(shopItem.getItem()));
-                config.set(path + ".items_adder_id", shopItem.getItemsAdderId());
                 config.set(path + ".current_buy_price", shopItem.getCurrentBuyPrice());
                 config.set(path + ".current_sell_price", shopItem.getCurrentSellPrice());
                 config.set(path + ".max_stock", shopItem.getMaxStock());

@@ -1,11 +1,13 @@
 package jiekie.command;
 
 import jiekie.EconomyPlugin;
+import jiekie.api.NicknameAPI;
 import jiekie.exception.ShopException;
 import jiekie.model.CommandContext;
 import jiekie.model.Shop;
 import jiekie.util.ChatUtil;
 import jiekie.util.SoundUtil;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -33,11 +35,12 @@ public class ShopCommand implements CommandExecutor {
         commandMap.put("인벤토리수설정", this::setInventorySize);
         commandMap.put("권한설정", this::setPermission);
         commandMap.put("변동주기설정", this::setInterval);
+        commandMap.put("템플릿설정", this::setGuiTemplate);
         commandMap.put("아이템설정", this::setItems);
         commandMap.put("구매가격설정", this::setBuyPrice);
         commandMap.put("판매가격설정", this::setSellPrice);
         commandMap.put("재고설정", this::setStock);
-        commandMap.put("최대변동룰설정", this::setMaxFluctuation);
+        commandMap.put("최대변동률설정", this::setMaxFluctuation);
         commandMap.put("재고초기화", this::resetStock);
         commandMap.put("아이템초기화", this::resetItems);
         commandMap.put("가격초기화", this::resetPrice);
@@ -68,7 +71,36 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void openShop(CommandContext context) {
+        CommandSender sender = context.getSender();
+        String[] args = context.getArgs();
 
+        if(args.length < 2) {
+            sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 열기 상점명 [플레이어ID|닉네임])");
+            return;
+        }
+
+        Player targetPlayer = null;
+        String targetPlayerName = null;
+        if(args.length == 2) {
+            targetPlayer = asPlayer(sender);
+            if(targetPlayer == null) return;
+            targetPlayerName = targetPlayer.getName();
+        }
+
+        if(args.length > 2) {
+            targetPlayerName = getContents(args, 2);
+            targetPlayer = NicknameAPI.getInstance().getPlayerByNameOrNickname(targetPlayerName);
+            if(targetPlayer == null) {
+                ChatUtil.showErrorMessage(sender, ChatUtil.PLAYER_NOT_FOUND);
+                return;
+            }
+        }
+
+        try {
+            plugin.getShopManager().openShop(targetPlayer, args[1], false);
+        } catch (ShopException e) {
+            ChatUtil.showErrorMessage(targetPlayer, e.getMessage());
+        }
     }
 
     private void createShop(CommandContext context) {
@@ -213,6 +245,29 @@ public class ShopCommand implements CommandExecutor {
         }
     }
 
+    private void setGuiTemplate(CommandContext context) {
+        CommandSender sender = context.getSender();
+        String[] args = context.getArgs();
+
+        if(args.length < 2) {
+            sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 템플릿설정 상점명 GUI명)");
+            return;
+        }
+
+        Player player = asPlayer(sender);
+        if(player == null) return;
+
+        try {
+            String templateId = args.length > 2 ? args[2] : null;
+            plugin.getShopManager().setGuiTemplate(args[1], templateId);
+            ChatUtil.setGuiTemplate(player);
+            SoundUtil.playNoteBlockBell(player);
+
+        } catch (ShopException e) {
+            ChatUtil.showErrorMessage(sender, e.getMessage());
+        }
+    }
+
     private void setItems(CommandContext context) {
         CommandSender sender = context.getSender();
         String[] args = context.getArgs();
@@ -220,6 +275,15 @@ public class ShopCommand implements CommandExecutor {
         if(args.length < 2) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 아이템설정 상점명)");
             return;
+        }
+
+        Player player = asPlayer(sender);
+        if(player == null) return;
+
+        try {
+            plugin.getShopManager().openShop(player, args[1], true);
+        } catch (ShopException e) {
+            ChatUtil.showErrorMessage(sender, e.getMessage());
         }
     }
 
@@ -408,5 +472,20 @@ public class ShopCommand implements CommandExecutor {
         }
 
         return (Player) sender;
+    }
+
+    private String getContents(String[] args, int startIndex) {
+        StringBuffer sb = new StringBuffer();
+
+        for(int i = startIndex; i < args.length; ++i) {
+            if (i != startIndex) {
+                sb.append(" ");
+            }
+
+            sb.append(args[i]);
+        }
+
+        String contents = sb.toString();
+        return ChatColor.translateAlternateColorCodes('&', contents);
     }
 }

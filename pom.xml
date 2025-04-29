@@ -88,11 +88,5 @@
           <version>2.11.6</version>
           <scope>provided</scope>
       </dependency>
-      <dependency>
-          <groupId>dev.lone</groupId>
-          <artifactId>api-itemsadder</artifactId>
-          <version>4.0.9</version>
-          <scope>provided</scope>
-      </dependency>
   </dependencies>
 </project>

@@ -6,7 +6,6 @@ import java.util.Random;
 
 public class ShopItem {
     private ItemStack item;
-    private String itemsAdderId;
     private int currentBuyPrice;
     private int currentSellPrice;
     private int maxStock;
@@ -17,8 +16,8 @@ public class ShopItem {
     private int minBuyPrice;
     private int maxSellPrice;
     private int minSellPrice;
-    private int buyFluctuationRate;
-    private int sellFluctuationRate;
+    private int buyFluctuationPercent;
+    private int sellFluctuationPercent;
     private int maxFluctuationRate;
 
     public ShopItem(ItemStack itemStack) {
@@ -27,14 +26,6 @@ public class ShopItem {
 
     public ItemStack getItem() {
         return item;
-    }
-
-    public String getItemsAdderId() {
-        return itemsAdderId;
-    }
-
-    public void setItemsAdderId(String itemsAdderId) {
-        this.itemsAdderId = itemsAdderId;
     }
 
     public int getCurrentBuyPrice() {
@@ -117,12 +108,12 @@ public class ShopItem {
         this.minSellPrice = minSellPrice;
     }
 
-    public int getBuyFluctuationRate() {
-        return buyFluctuationRate;
+    public int getBuyFluctuationPercent() {
+        return buyFluctuationPercent;
     }
 
-    public int getSellFluctuationRate() {
-        return sellFluctuationRate;
+    public int getSellFluctuationPercent() {
+        return sellFluctuationPercent;
     }
 
     public int getMaxFluctuationRate() {
@@ -137,14 +128,14 @@ public class ShopItem {
         Random random = new Random();
 
         // change buy price
-        int buyFluctuationPercent = random.nextInt(maxFluctuationRate * 2 + 1) - maxFluctuationRate;
+        buyFluctuationPercent = random.nextInt(maxFluctuationRate * 2 + 1) - maxFluctuationRate;
         double multiplier = 1.0 + (buyFluctuationPercent / 100.0);
         int newBuyPrice = (int) Math.round(currentBuyPrice * multiplier);
         newBuyPrice = Math.max(minBuyPrice, Math.min(maxBuyPrice, newBuyPrice));
         currentBuyPrice = newBuyPrice;
 
         // change sell price
-        int sellFluctuationPercent = random.nextInt(maxFluctuationRate * 2 + 1) - maxFluctuationRate;
+        sellFluctuationPercent = random.nextInt(maxFluctuationRate * 2 + 1) - maxFluctuationRate;
         multiplier = 1.0 + (sellFluctuationPercent / 100.0);
         int newSellPrice = (int) Math.round(currentSellPrice * multiplier);
         newSellPrice = Math.max(minSellPrice, Math.min(maxSellPrice, newSellPrice));

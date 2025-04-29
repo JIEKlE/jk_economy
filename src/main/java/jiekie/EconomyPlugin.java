@@ -7,6 +7,7 @@ import jiekie.command.ShopCommand;
 import jiekie.completer.CheckTabCompleter;
 import jiekie.completer.MoneyTabCompleter;
 import jiekie.completer.ShopTabCompleter;
+import jiekie.event.InventoryEvent;
 import jiekie.event.PlayerEvent;
 import jiekie.manager.MoneyManager;
 import jiekie.manager.ShopManager;
@@ -47,6 +48,7 @@ public final class EconomyPlugin extends JavaPlugin {
 
     private void setupEvents() {
         getServer().getPluginManager().registerEvents(new PlayerEvent(this), this);
+        getServer().getPluginManager().registerEvents(new InventoryEvent(this), this);
     }
 
     private void setupCommands() {
