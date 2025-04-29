@@ -1,5 +1,6 @@
 package jiekie;
 
+import jiekie.api.MoneyAPI;
 import jiekie.api.MoneyPlaceholder;
 import jiekie.command.CheckCommand;
 import jiekie.command.MoneyCommand;
@@ -27,7 +28,7 @@ public final class EconomyPlugin extends JavaPlugin {
         setupCommands();
         setupTabCompleter();
         setupScheduler();
-        setupPlaceholders();
+        setupAPI();
         setupPackets();
 
         getLogger().info("경제 플러그인 by Jiekie");
@@ -67,8 +68,9 @@ public final class EconomyPlugin extends JavaPlugin {
         shopManager.updateShopItemPrice();
     }
 
-    private void setupPlaceholders() {
+    private void setupAPI() {
         new MoneyPlaceholder(this).register();
+        MoneyAPI.initialize(moneyManager);
     }
 
     private void setupPackets() {
