@@ -13,7 +13,7 @@
 
     <description>경제 플러그인</description>
     <properties>
-    <java.version>1.8</java.version>
+    <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -63,6 +63,10 @@
           <id>jitpack.io</id>
           <url>https://jitpack.io</url>
       </repository>
+      <repository>
+          <id>matteodev</id>
+          <url>https://maven.devs.beer/</url>
+      </repository>
   </repositories>
 
   <dependencies>
@@ -75,13 +79,19 @@
       <dependency>
           <groupId>com.github.JIEKlE</groupId>
           <artifactId>jk_nickname</artifactId>
-          <version>v1.0.5</version>
+          <version>v1.0.6</version>
           <scope>provided</scope>
       </dependency>
       <dependency>
           <groupId>com.github.PlaceholderAPI</groupId>
           <artifactId>PlaceholderAPI</artifactId>
           <version>2.11.6</version>
+          <scope>provided</scope>
+      </dependency>
+      <dependency>
+          <groupId>dev.lone</groupId>
+          <artifactId>api-itemsadder</artifactId>
+          <version>4.0.9</version>
           <scope>provided</scope>
       </dependency>
   </dependencies>

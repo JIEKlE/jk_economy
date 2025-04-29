@@ -18,7 +18,7 @@ import java.util.*;
 public class MoneyManager {
     private final EconomyPlugin plugin;
     private final Map<UUID, Integer> moneyMap = new HashMap<>();
-    private final String CONFIG_FILE_NAME = "money.yml";
+    private static final String CONFIG_FILE_NAME = "money.yml";
 
     public MoneyManager(EconomyPlugin plugin) {
         this.plugin = plugin;

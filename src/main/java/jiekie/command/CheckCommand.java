@@ -38,7 +38,7 @@ public class CheckCommand implements CommandExecutor {
 
         switch(args[0]) {
             case "도움말":
-                ChatUtil.moneyCommandList(player);
+                ChatUtil.checkCommandList(player);
                 break;
 
             default:
@@ -56,15 +56,25 @@ public class CheckCommand implements CommandExecutor {
         try {
             amountOfMoney = Integer.parseInt(args[0]);
         } catch (NumberFormatException e) {
-            ChatUtil.showErrorMessage(player, ChatUtil.INVALID_AMOUNT_OF_MONEY);
+            ChatUtil.showErrorMessage(player, ChatUtil.MONEY_NOT_NUMBER);
             return;
         }
+
+         if(amountOfMoney <= 0) {
+             ChatUtil.showErrorMessage(player, ChatUtil.MINUS_MONEY);
+             return;
+         }
 
         if(args.length > 1) {
             try {
                 amountOfItem = Integer.parseInt(args[1]);
             } catch (NumberFormatException e) {
-                ChatUtil.showErrorMessage(player, ChatUtil.INVALID_AMOUNT_OF_ITEM);
+                ChatUtil.showErrorMessage(player, ChatUtil.AMOUNT_OF_ITEM_NOT_NUMBER);
+                return;
+            }
+
+            if(amountOfItem <= 0) {
+                ChatUtil.showErrorMessage(player, ChatUtil.MINUS_AMOUNT_OF_ITEM);
                 return;
             }
         }

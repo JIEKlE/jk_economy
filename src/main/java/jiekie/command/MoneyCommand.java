@@ -3,8 +3,8 @@ package jiekie.command;
 import jiekie.EconomyPlugin;
 import jiekie.api.NicknameAPI;
 import jiekie.manager.MoneyManager;
+import jiekie.model.PlayerNameData;
 import jiekie.util.ChatUtil;
-import jiekie.util.PlayerNameData;
 import jiekie.util.SoundUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -116,7 +116,12 @@ public class MoneyCommand implements CommandExecutor {
         try {
             amountOfMoney = Integer.parseInt(args[1]);
         } catch (NumberFormatException e) {
-            ChatUtil.showErrorMessage(player, ChatUtil.INVALID_AMOUNT_OF_MONEY);
+            ChatUtil.showErrorMessage(player, ChatUtil.MONEY_NOT_NUMBER);
+            return;
+        }
+
+        if(amountOfMoney <= 0) {
+            ChatUtil.showErrorMessage(player, ChatUtil.MINUS_MONEY);
             return;
         }
 
@@ -169,7 +174,12 @@ public class MoneyCommand implements CommandExecutor {
         try {
             amountOfMoney = Integer.parseInt(args[1]);
         } catch (NumberFormatException e) {
-            ChatUtil.showErrorMessage(sender, ChatUtil.INVALID_AMOUNT_OF_MONEY);
+            ChatUtil.showErrorMessage(sender, ChatUtil.MONEY_NOT_NUMBER);
+            return;
+        }
+
+        if(amountOfMoney <= 0) {
+            ChatUtil.showErrorMessage(sender, ChatUtil.MINUS_MONEY);
             return;
         }
 
@@ -223,7 +233,7 @@ public class MoneyCommand implements CommandExecutor {
             try {
                 page = Integer.parseInt(args[1]);
             } catch (NumberFormatException e) {
-                ChatUtil.showErrorMessage(sender, ChatUtil.INVALID_PAGE);
+                ChatUtil.showErrorMessage(sender, ChatUtil.PAGE_NOT_NUMBER);
                 return;
             }
         }
@@ -256,7 +266,7 @@ public class MoneyCommand implements CommandExecutor {
             ChatUtil.rankMoney(sender, rank, name, formattedMoney);
         }
 
-        ChatUtil.rankMoneySuffix(sender);
+        ChatUtil.horizontalLineSuffix(sender);
     }
 
     private String getContents(String[] args, int startIndex) {
