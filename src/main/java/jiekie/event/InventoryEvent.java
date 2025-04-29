@@ -5,6 +5,7 @@ import jiekie.exception.ShopException;
 import jiekie.model.ShopInventoryHolder;
 import jiekie.model.ShopItem;
 import jiekie.util.ChatUtil;
+import jiekie.util.ItemUtil;
 import jiekie.util.SoundUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -15,8 +16,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
-import org.bukkit.inventory.meta.ItemMeta;
 
 public class InventoryEvent implements Listener {
     private final EconomyPlugin plugin;
@@ -142,7 +141,7 @@ public class InventoryEvent implements Listener {
         int count = 0;
 
         for(ItemStack item : inventory.getContents()) {
-            if(!isSameItem(item, target)) continue;
+            if(!ItemUtil.isSameItem(item, target)) continue;
             count += item.getAmount();
         }
 
@@ -151,36 +150,12 @@ public class InventoryEvent implements Listener {
 
     private void removeItem(Inventory inventory, ItemStack target, int amount) {
         for(ItemStack item : inventory.getContents()) {
-            if(!isSameItem(item, target)) continue;
+            if(!ItemUtil.isSameItem(item, target)) continue;
             int toRemove = Math.min(item.getAmount(), amount);
             item.setAmount(item.getAmount() - toRemove);
             amount -= toRemove;
             if(amount <= 0) break;
         }
-    }
-
-    private boolean isSameItem(ItemStack a, ItemStack b) {
-        if(a == null || b == null) return false;
-        if(a.getType() != b.getType()) return false;
-
-        ItemMeta metaA = a.getItemMeta();
-        ItemMeta metaB = b.getItemMeta();
-
-        if(metaA == null && metaB == null) return true;
-        if(metaA == null || metaB == null) return false;
-
-        if(metaA.hasDisplayName() != metaB.hasDisplayName()) return false;
-        if(metaA.hasDisplayName() && !metaA.getDisplayName().equals(metaB.getDisplayName())) return false;
-
-        if(metaA.hasCustomModelData() != metaB.hasCustomModelData()) return false;
-        if(metaA.hasCustomModelData() && metaA.getCustomModelData() != metaB.getCustomModelData()) return false;
-
-        if(!(metaA instanceof Damageable) || !(metaB instanceof Damageable)) return true;
-        Damageable damageableA = (Damageable) metaA;
-        Damageable damageableB = (Damageable) metaB;
-        if(damageableA.getDamage() != damageableB.getDamage()) return false;
-
-        return true;
     }
 
     private void onShopInventoryClose(InventoryCloseEvent e) {

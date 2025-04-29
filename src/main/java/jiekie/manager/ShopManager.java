@@ -7,6 +7,7 @@ import jiekie.model.ShopInventoryHolder;
 import jiekie.model.ShopItem;
 import jiekie.model.ShopType;
 import jiekie.util.ChatUtil;
+import jiekie.util.ItemUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -15,7 +16,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.io.BukkitObjectInputStream;
@@ -436,7 +436,7 @@ public class ShopManager {
             }
 
             ShopItem existingShopItem = items.get(i);
-            if(existingShopItem != null && isSameItem(item, existingShopItem.getItem())) continue;
+            if(existingShopItem != null && ItemUtil.isSameItem(item, existingShopItem.getItem())) continue;
 
             ItemStack slotItem = item.clone();
             slotItem.setAmount(1);
@@ -448,30 +448,6 @@ public class ShopManager {
         removeList.forEach(items::remove);
 
         shop.setItems(items);
-    }
-
-    private boolean isSameItem(ItemStack a, ItemStack b) {
-        if(a == null || b == null) return false;
-        if(a.getType() != b.getType()) return false;
-
-        ItemMeta metaA = a.getItemMeta();
-        ItemMeta metaB = b.getItemMeta();
-
-        if(metaA == null && metaB == null) return true;
-        if(metaA == null || metaB == null) return false;
-
-        if(metaA.hasDisplayName() != metaB.hasDisplayName()) return false;
-        if(metaA.hasDisplayName() && !metaA.getDisplayName().equals(metaB.getDisplayName())) return false;
-
-        if(metaA.hasCustomModelData() != metaB.hasCustomModelData()) return false;
-        if(metaA.hasCustomModelData() && metaA.getCustomModelData() != metaB.getCustomModelData()) return false;
-
-        if(!(metaA instanceof Damageable) || !(metaB instanceof Damageable)) return true;
-        Damageable damageableA = (Damageable) metaA;
-        Damageable damageableB = (Damageable) metaB;
-        if(damageableA.getDamage() != damageableB.getDamage()) return false;
-
-        return true;
     }
 
     public Shop getShopOrThrow(String name) throws ShopException {
