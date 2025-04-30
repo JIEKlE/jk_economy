@@ -5,12 +5,14 @@ import jiekie.api.NicknameAPI;
 import jiekie.manager.MoneyManager;
 import jiekie.model.PlayerNameData;
 import jiekie.util.ChatUtil;
+import jiekie.util.NumberUtil;
 import jiekie.util.SoundUtil;
-import org.bukkit.ChatColor;
+import jiekie.util.StringUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -24,7 +26,7 @@ public class MoneyCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if(args == null || args.length == 0) {
             ChatUtil.moneyCommandHelper(sender);
             return true;
@@ -78,18 +80,17 @@ public class MoneyCommand implements CommandExecutor {
                 return;
             }
 
-            targetPlayerName = getContents(args, 1);
+            targetPlayerName = StringUtil.getContents(args, 1);
             targetPlayer = NicknameAPI.getInstance().getPlayerByNameOrNickname(targetPlayerName);
             if(targetPlayer == null) {
-                ChatUtil.showErrorMessage(targetPlayer, ChatUtil.PLAYER_NOT_FOUND);
+                ChatUtil.showErrorMessage(sender, ChatUtil.PLAYER_NOT_FOUND);
                 return;
             }
             targetPlayerUuid = targetPlayer.getUniqueId();
         }
 
-        MoneyManager moneyManager = plugin.getMoneyManager();
-        int money = moneyManager.getMoney(targetPlayerUuid);
-        String formattedMoney = moneyManager.getFormattedMoney(money);
+        int money = plugin.getMoneyManager().getMoney(targetPlayerUuid);
+        String formattedMoney = NumberUtil.getFormattedMoney(money);
 
         PlayerNameData playerNameData = NicknameAPI.getInstance().getPlayerNameData(targetPlayerUuid);
         if(playerNameData != null)
@@ -101,12 +102,11 @@ public class MoneyCommand implements CommandExecutor {
 
     private void payMoney(CommandSender sender, String[] args) {
         // validation
-        if(!(sender instanceof Player)) {
+        if(!(sender instanceof Player player)) {
             ChatUtil.notPlayer(sender);
             return;
         }
 
-        Player player = (Player) sender;
         if(args.length < 3) {
             player.sendMessage(ChatUtil.wrongCommand() + " (/돈 송금 금액 플레이어ID|닉네임)");
             return;
@@ -133,7 +133,7 @@ public class MoneyCommand implements CommandExecutor {
             return;
         }
 
-        String targetPlayerName = getContents(args, 2);
+        String targetPlayerName = StringUtil.getContents(args, 2);
         Player targetPlayer = NicknameAPI.getInstance().getPlayerByNameOrNickname(targetPlayerName);
         if(targetPlayer == null) {
             ChatUtil.showErrorMessage(player, ChatUtil.PLAYER_NOT_FOUND);
@@ -150,7 +150,7 @@ public class MoneyCommand implements CommandExecutor {
         if(playerNameData != null)
             playerName = playerNameData.getNickname();
 
-        String formattedMoney = moneyManager.getFormattedMoney(amountOfMoney);
+        String formattedMoney = NumberUtil.getFormattedMoney(amountOfMoney);
         ChatUtil.payMoney(player, targetPlayerName, formattedMoney);
         SoundUtil.playNoteBlockBell(player);
 
@@ -183,7 +183,7 @@ public class MoneyCommand implements CommandExecutor {
             return;
         }
 
-        String targetPlayerName = getContents(args, 2);
+        String targetPlayerName = StringUtil.getContents(args, 2);
         Player targetPlayer = NicknameAPI.getInstance().getPlayerByNameOrNickname(targetPlayerName);
         if(targetPlayer == null) {
             ChatUtil.showErrorMessage(sender, ChatUtil.PLAYER_NOT_FOUND);
@@ -191,29 +191,30 @@ public class MoneyCommand implements CommandExecutor {
         }
 
         MoneyManager moneyManager = plugin.getMoneyManager();
-        String formattedMoney = moneyManager.getFormattedMoney(amountOfMoney);
+        String formattedMoney = NumberUtil.getFormattedMoney(amountOfMoney);
 
         // operation
-        if(operation.equals("ADD"))
-            moneyManager.addMoney(targetPlayer.getUniqueId(), amountOfMoney);
-        else if(operation.equals("SUBTRACT"))
-            moneyManager.subtractMoney(targetPlayer.getUniqueId(), amountOfMoney);
-        else if(operation.equals("SET"))
-            moneyManager.setMoney(targetPlayer.getUniqueId(), amountOfMoney);
+        switch (operation) {
+            case "ADD" -> moneyManager.addMoney(targetPlayer.getUniqueId(), amountOfMoney);
+            case "SUBTRACT" -> moneyManager.subtractMoney(targetPlayer.getUniqueId(), amountOfMoney);
+            case "SET" -> moneyManager.setMoney(targetPlayer.getUniqueId(), amountOfMoney);
+        }
 
         if(sender instanceof Player) {
             // chat
-            if(operation.equals("ADD")) {
-                ChatUtil.addMoney(sender, targetPlayerName, formattedMoney);
-                ChatUtil.moneyIsAdded(targetPlayer, formattedMoney);
-
-            } else if(operation.equals("SUBTRACT")) {
-                ChatUtil.subtractMoney(sender, targetPlayerName, formattedMoney);
-                ChatUtil.moneyIsSubtracted(targetPlayer, formattedMoney);
-
-            } else if(operation.equals("SET")) {
-                ChatUtil.setMoney(sender, targetPlayerName, formattedMoney);
-                ChatUtil.moneyIsSet(targetPlayer, formattedMoney);
+            switch (operation) {
+                case "ADD" -> {
+                    ChatUtil.addMoney(sender, targetPlayerName, formattedMoney);
+                    ChatUtil.moneyIsAdded(targetPlayer, formattedMoney);
+                }
+                case "SUBTRACT" -> {
+                    ChatUtil.subtractMoney(sender, targetPlayerName, formattedMoney);
+                    ChatUtil.moneyIsSubtracted(targetPlayer, formattedMoney);
+                }
+                case "SET" -> {
+                    ChatUtil.setMoney(sender, targetPlayerName, formattedMoney);
+                    ChatUtil.moneyIsSet(targetPlayer, formattedMoney);
+                }
             }
 
             // sound effect
@@ -238,8 +239,7 @@ public class MoneyCommand implements CommandExecutor {
             }
         }
 
-        MoneyManager moneyManager = plugin.getMoneyManager();
-        List<Map.Entry<UUID, Integer>> sortedMoneyList = moneyManager.getSortedMoneyList();
+        List<Map.Entry<UUID, Integer>> sortedMoneyList = plugin.getMoneyManager().getSortedMoneyList();
 
         int pageSize = 10;
         int start = (page - 1) * pageSize;
@@ -257,7 +257,7 @@ public class MoneyCommand implements CommandExecutor {
             String name = uuid.toString();
             int rank = i + 1;
             int money = sortedMoneyList.get(i).getValue();
-            String formattedMoney = moneyManager.getFormattedMoney(money);
+            String formattedMoney = NumberUtil.getFormattedMoney(money);
 
             PlayerNameData playerNameData = NicknameAPI.getInstance().getPlayerNameData(uuid);
             if(playerNameData != null)
@@ -267,20 +267,5 @@ public class MoneyCommand implements CommandExecutor {
         }
 
         ChatUtil.horizontalLineSuffix(sender);
-    }
-
-    private String getContents(String[] args, int startIndex) {
-        StringBuffer sb = new StringBuffer();
-
-        for(int i = startIndex; i < args.length; ++i) {
-            if (i != startIndex) {
-                sb.append(" ");
-            }
-
-            sb.append(args[i]);
-        }
-
-        String contents = sb.toString();
-        return ChatColor.translateAlternateColorCodes('&', contents);
     }
 }

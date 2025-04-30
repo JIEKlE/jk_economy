@@ -39,53 +39,59 @@ public class ShopTabCompleter implements TabCompleter {
             return plugin.getShopManager().getShopNameList();
 
         if(length == 3) {
-            if(commandType.equals("열기"))
-                return NicknameAPI.getInstance().getPlayerNameAndNicknameList();
-
-            if(commandType.equals("생성"))
-                return ShopType.getDisplayNames();
-
-            if(commandType.equals("인벤토리수설정"))
-                return Arrays.asList("27", "54");
-
-            if(commandType.equals("권한설정"))
-                return Arrays.asList("영어권한명");
-
-            if(commandType.equals("변동주기설정"))
-                return Arrays.asList("30", "60", "90");
-
-            if(commandType.equals("템플릿설정"))
-                return Arrays.asList("템플릿ID");
-
-            if(commandType.equals("구매가격설정") || commandType.equals("판매가격설정") || commandType.equals("재고설정") || commandType.equals("최대변동룰설정"))
-                return Arrays.asList("슬롯번호");
+            switch (commandType) {
+                case "열기" -> {
+                    return NicknameAPI.getInstance().getPlayerNameAndNicknameList();
+                }
+                case "생성" -> {
+                    return ShopType.getDisplayNames();
+                }
+                case "인벤토리수설정" -> {
+                    return Arrays.asList("27", "54");
+                }
+                case "권한설정" -> {
+                    return List.of("영어권한명");
+                }
+                case "변동주기설정" -> {
+                    return Arrays.asList("30", "60", "90");
+                }
+                case "템플릿설정" -> {
+                    return List.of("템플릿ID");
+                }
+                case "구매가격설정", "판매가격설정", "재고설정", "최대변동룰설정" -> {
+                    return List.of("슬롯번호");
+                }
+            }
         }
 
         if(length == 4) {
-            if(commandType.equals("생성"))
-                return Arrays.asList("27", "54");
-
-            if(commandType.equals("권한설정"))
-                return Arrays.asList("한글권한명");
-
-            if(commandType.equals("구매가격설정") || commandType.equals("판매가격설정"))
-                return Arrays.asList("기본가");
-
-            if(commandType.equals("재고설정"))
-                return Arrays.asList("재고");
-
-            if(commandType.equals("최대변동룰설정"))
-                return Arrays.asList("%");
+            switch (commandType) {
+                case "생성" -> {
+                    return Arrays.asList("27", "54");
+                }
+                case "권한설정" -> {
+                    return List.of("한글권한명");
+                }
+                case "구매가격설정", "판매가격설정" -> {
+                    return List.of("기본가");
+                }
+                case "재고설정" -> {
+                    return List.of("재고");
+                }
+                case "최대변동룰설정" -> {
+                    return List.of("%");
+                }
+            }
         }
 
         if(length == 5) {
             if(commandType.equals("구매가격설정") || commandType.equals("판매가격설정"))
-                return Arrays.asList("최고가");
+                return List.of("최고가");
         }
 
         if(length == 6) {
             if(commandType.equals("구매가격설정") || commandType.equals("판매가격설정"))
-                return Arrays.asList("최저가");
+                return List.of("최저가");
         }
 
         return Collections.emptyList();

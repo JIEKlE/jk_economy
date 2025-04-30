@@ -7,11 +7,12 @@ import jiekie.model.CommandContext;
 import jiekie.model.Shop;
 import jiekie.util.ChatUtil;
 import jiekie.util.SoundUtil;
-import org.bukkit.ChatColor;
+import jiekie.util.StringUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,11 +46,11 @@ public class ShopCommand implements CommandExecutor {
         commandMap.put("아이템초기화", this::resetItems);
         commandMap.put("가격초기화", this::resetPrice);
         commandMap.put("정보", this::showShopInfo);
-        commandMap.put("도움말", ctx -> ChatUtil.shopCommandList(ctx.getSender()));
+        commandMap.put("도움말", ctx -> ChatUtil.shopCommandList(ctx.sender()));
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if(!sender.isOp()) {
             ChatUtil.notOp(sender);
             return true;
@@ -71,8 +72,8 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void openShop(CommandContext context) {
-        CommandSender sender = context.getSender();
-        String[] args = context.getArgs();
+        CommandSender sender = context.sender();
+        String[] args = context.args();
 
         if(args.length < 2) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 열기 상점명 [플레이어ID|닉네임])");
@@ -80,15 +81,13 @@ public class ShopCommand implements CommandExecutor {
         }
 
         Player targetPlayer = null;
-        String targetPlayerName = null;
         if(args.length == 2) {
             targetPlayer = asPlayer(sender);
             if(targetPlayer == null) return;
-            targetPlayerName = targetPlayer.getName();
         }
 
         if(args.length > 2) {
-            targetPlayerName = getContents(args, 2);
+            String targetPlayerName = StringUtil.getContents(args, 2);
             targetPlayer = NicknameAPI.getInstance().getPlayerByNameOrNickname(targetPlayerName);
             if(targetPlayer == null) {
                 ChatUtil.showErrorMessage(sender, ChatUtil.PLAYER_NOT_FOUND);
@@ -104,8 +103,8 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void createShop(CommandContext context) {
-        CommandSender sender = context.getSender();
-        String[] args = context.getArgs();
+        CommandSender sender = context.sender();
+        String[] args = context.args();
 
         if(args.length < 4) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 생성 상점명 유형 인벤토리수)");
@@ -126,8 +125,8 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void removeShop(CommandContext context) {
-        CommandSender sender = context.getSender();
-        String[] args = context.getArgs();
+        CommandSender sender = context.sender();
+        String[] args = context.args();
 
         if(args.length < 2) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 제거 상점명)");
@@ -148,8 +147,8 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void activateShop(CommandContext context, boolean activate) {
-        CommandSender sender = context.getSender();
-        String[] args = context.getArgs();
+        CommandSender sender = context.sender();
+        String[] args = context.args();
 
         if(args.length < 2) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 활성화|비활성화 상점명)");
@@ -174,8 +173,8 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void setInventorySize(CommandContext context) {
-        CommandSender sender = context.getSender();
-        String[] args = context.getArgs();
+        CommandSender sender = context.sender();
+        String[] args = context.args();
 
         if(args.length < 3) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 인벤토리수설정 상점명 인벤토리수)");
@@ -196,8 +195,8 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void setPermission(CommandContext context) {
-        CommandSender sender = context.getSender();
-        String[] args = context.getArgs();
+        CommandSender sender = context.sender();
+        String[] args = context.args();
 
         if(args.length < 2) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 권한설정 상점명 영어권한명 한글권한명)");
@@ -205,7 +204,7 @@ public class ShopCommand implements CommandExecutor {
         }
 
         try {
-            boolean setPermission = args.length >= 4 ? true : false;
+            boolean setPermission = args.length >= 4;
             String englishPermission = args.length >= 4 ? args[2] : null;
             String koreanPermission = args.length >= 4 ? args[3] : null;
             plugin.getShopManager().setPermission(args[1], englishPermission, koreanPermission);
@@ -224,8 +223,8 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void setInterval(CommandContext context) {
-        CommandSender sender = context.getSender();
-        String[] args = context.getArgs();
+        CommandSender sender = context.sender();
+        String[] args = context.args();
 
         if(args.length < 3) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 변동주기설정 상점명 숫자(분))");
@@ -246,8 +245,8 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void setGuiTemplate(CommandContext context) {
-        CommandSender sender = context.getSender();
-        String[] args = context.getArgs();
+        CommandSender sender = context.sender();
+        String[] args = context.args();
 
         if(args.length < 2) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 템플릿설정 상점명 GUI명)");
@@ -260,7 +259,12 @@ public class ShopCommand implements CommandExecutor {
         try {
             String templateId = args.length > 2 ? args[2] : null;
             plugin.getShopManager().setGuiTemplate(args[1], templateId);
-            ChatUtil.setGuiTemplate(player);
+
+            if(templateId == null)
+                ChatUtil.resetGuiTemplate(player);
+            else
+                ChatUtil.setGuiTemplate(player);
+
             SoundUtil.playNoteBlockBell(player);
 
         } catch (ShopException e) {
@@ -269,8 +273,8 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void setItems(CommandContext context) {
-        CommandSender sender = context.getSender();
-        String[] args = context.getArgs();
+        CommandSender sender = context.sender();
+        String[] args = context.args();
 
         if(args.length < 2) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 아이템설정 상점명)");
@@ -288,8 +292,8 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void setBuyPrice(CommandContext context) {
-        CommandSender sender = context.getSender();
-        String[] args = context.getArgs();
+        CommandSender sender = context.sender();
+        String[] args = context.args();
 
         if(args.length < 4) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 구매가격설정 상점명 슬롯번호 기본가 [최고가] [최저가])");
@@ -310,8 +314,8 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void setSellPrice(CommandContext context) {
-        CommandSender sender = context.getSender();
-        String[] args = context.getArgs();
+        CommandSender sender = context.sender();
+        String[] args = context.args();
 
         if(args.length < 4) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 판매가격설정 상점명 슬롯번호 기본가 [최고가] [최저가])");
@@ -332,8 +336,8 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void setStock(CommandContext context) {
-        CommandSender sender = context.getSender();
-        String[] args = context.getArgs();
+        CommandSender sender = context.sender();
+        String[] args = context.args();
 
         if(args.length < 4) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 재고설정 상점명 슬롯번호 재고)");
@@ -354,8 +358,8 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void setMaxFluctuation(CommandContext context) {
-        CommandSender sender = context.getSender();
-        String[] args = context.getArgs();
+        CommandSender sender = context.sender();
+        String[] args = context.args();
 
         if(args.length < 4) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 최대변동룰설정 상점명 슬롯번호 숫자(%))");
@@ -376,8 +380,8 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void resetStock(CommandContext context) {
-        CommandSender sender = context.getSender();
-        String[] args = context.getArgs();
+        CommandSender sender = context.sender();
+        String[] args = context.args();
 
         if(args.length < 2) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 재고초기화 상점명)");
@@ -398,8 +402,8 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void resetItems(CommandContext context) {
-        CommandSender sender = context.getSender();
-        String[] args = context.getArgs();
+        CommandSender sender = context.sender();
+        String[] args = context.args();
 
         if(args.length < 2) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 아이템초기화 상점명)");
@@ -420,8 +424,8 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void resetPrice(CommandContext context) {
-        CommandSender sender = context.getSender();
-        String[] args = context.getArgs();
+        CommandSender sender = context.sender();
+        String[] args = context.args();
 
         if(args.length < 2) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 가격초기화 상점명)");
@@ -442,8 +446,8 @@ public class ShopCommand implements CommandExecutor {
     }
 
     private void showShopInfo(CommandContext context) {
-        CommandSender sender = context.getSender();
-        String[] args = context.getArgs();
+        CommandSender sender = context.sender();
+        String[] args = context.args();
 
         if(args.length < 2) {
             sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 정보 상점명)");
@@ -472,20 +476,5 @@ public class ShopCommand implements CommandExecutor {
         }
 
         return (Player) sender;
-    }
-
-    private String getContents(String[] args, int startIndex) {
-        StringBuffer sb = new StringBuffer();
-
-        for(int i = startIndex; i < args.length; ++i) {
-            if (i != startIndex) {
-                sb.append(" ");
-            }
-
-            sb.append(args[i]);
-        }
-
-        String contents = sb.toString();
-        return ChatColor.translateAlternateColorCodes('&', contents);
     }
 }

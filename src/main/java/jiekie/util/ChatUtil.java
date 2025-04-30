@@ -171,10 +171,6 @@ public class ChatUtil {
         sender.sendMessage(getWarnPrefix() + "상점의 GUI 템플릿을 해제했습니다.");
     }
 
-    public static void setItems(CommandSender sender) {
-        sender.sendMessage(getWarnPrefix() + "상점의 물품 목록을 설정했습니다.");
-    }
-
     public static void setBuyPrice(CommandSender sender) {
         sender.sendMessage(getWarnPrefix() + "물품의 구매 가격을 설정했습니다.");
     }
@@ -205,6 +201,14 @@ public class ChatUtil {
 
     public static void setShopItems(CommandSender sender) {
         sender.sendMessage(getWarnPrefix() + "상점의 물품 목록을 설정했습니다.");
+    }
+
+    public static void buyItem(CommandSender sender, String formattedMoney) {
+        sender.sendMessage(getWarnPrefix() + "물품을 구매했습니다. " + ChatColor.RED + "( -" + formattedMoney + " )");
+    }
+
+    public static void sellItem(CommandSender sender, String formattedMoney) {
+        sender.sendMessage(getWarnPrefix() + "물품을 판매했습니다. " + ChatColor.GREEN + "( +" + formattedMoney + " )");
     }
 
     public static void shopInfoPrefix(CommandSender sender) {

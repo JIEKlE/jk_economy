@@ -6,6 +6,7 @@ import jiekie.model.ShopInventoryHolder;
 import jiekie.model.ShopItem;
 import jiekie.util.ChatUtil;
 import jiekie.util.ItemUtil;
+import jiekie.util.NumberUtil;
 import jiekie.util.SoundUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -36,14 +37,11 @@ public class InventoryEvent implements Listener {
 
     private void onShopInventoryClick(InventoryClickEvent e) {
         HumanEntity humanEntity = e.getWhoClicked();
-        if(humanEntity == null || !(humanEntity instanceof Player)) return;
-        Player player = (Player) humanEntity;
+        if(!(humanEntity instanceof Player player)) return;
 
         Inventory inventory = e.getClickedInventory();
         if(inventory == null) return;
-        if(!(inventory.getHolder() instanceof ShopInventoryHolder)) return;
-
-        ShopInventoryHolder holder = (ShopInventoryHolder) inventory.getHolder();
+        if(!(inventory.getHolder() instanceof ShopInventoryHolder holder)) return;
         if(holder.isSettingMode()) return;
 
         e.setCancelled(true);
@@ -52,7 +50,7 @@ public class InventoryEvent implements Listener {
         if(item == null || item.getType() == Material.AIR) return;
 
         try {
-            ShopItem shopItem = plugin.getShopManager().getShopItemOrThrow(holder.getName(), e.getSlot());
+            ShopItem shopItem = plugin.getShopManager().getShopItemOrThrow(holder.name(), e.getSlot());
 
             boolean shiftClick = e.isShiftClick();
             boolean rightClick = e.getClick().isRightClick();
@@ -62,7 +60,7 @@ public class InventoryEvent implements Listener {
             else
                 handleBuy(player, shopItem, shiftClick);
 
-            plugin.getShopManager().setInventoryForTrade(inventory, holder.getName());
+            plugin.getShopManager().setInventoryForTrade(inventory, holder.name());
 
         } catch (ShopException ex) {
             ChatUtil.showErrorMessage(player, ex.getMessage());
@@ -104,6 +102,7 @@ public class InventoryEvent implements Listener {
         if(shopItem.getMaxStock() > 0)
             shopItem.setAvailableStock(shopItem.getAvailableStock() - amountOfItem);
 
+        ChatUtil.buyItem(player, NumberUtil.getFormattedMoney(totalCost));
         SoundUtil.playNoteBlockBell(player);
     }
 
@@ -134,6 +133,7 @@ public class InventoryEvent implements Listener {
         int totalCost = shopItem.getCurrentSellPrice() * amountOfItem;
         plugin.getMoneyManager().addMoney(player.getUniqueId(), totalCost);
 
+        ChatUtil.sellItem(player, NumberUtil.getFormattedMoney(totalCost));
         SoundUtil.playNoteBlockBell(player);
     }
 
@@ -160,17 +160,14 @@ public class InventoryEvent implements Listener {
 
     private void onShopInventoryClose(InventoryCloseEvent e) {
         Inventory inventory = e.getInventory();
-        if(!(inventory.getHolder() instanceof ShopInventoryHolder)) return;
-
-        ShopInventoryHolder holder = (ShopInventoryHolder) inventory.getHolder();
+        if(!(inventory.getHolder() instanceof ShopInventoryHolder holder)) return;
         if(!holder.isSettingMode()) return;
 
         HumanEntity humanEntity = e.getPlayer();
-        if(humanEntity == null || !(humanEntity instanceof Player)) return;
-        Player player = (Player) humanEntity;
+        if(!(humanEntity instanceof Player player)) return;
 
         try {
-            plugin.getShopManager().setShopItems(holder.getName(), inventory);
+            plugin.getShopManager().setShopItems(holder.name(), inventory);
             ChatUtil.setShopItems(player);
             SoundUtil.playNoteBlockBell(player);
 

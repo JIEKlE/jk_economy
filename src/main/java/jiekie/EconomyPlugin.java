@@ -59,8 +59,8 @@ public final class EconomyPlugin extends JavaPlugin {
     }
 
     private void setupTabCompleter() {
-        getCommand("돈").setTabCompleter(new MoneyTabCompleter(this));
-        getCommand("수표").setTabCompleter(new CheckTabCompleter(this));
+        getCommand("돈").setTabCompleter(new MoneyTabCompleter());
+        getCommand("수표").setTabCompleter(new CheckTabCompleter());
         getCommand("상점").setTabCompleter(new ShopTabCompleter(this));
     }
 

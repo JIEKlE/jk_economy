@@ -3,6 +3,7 @@ package jiekie.command;
 import jiekie.EconomyPlugin;
 import jiekie.manager.MoneyManager;
 import jiekie.util.ChatUtil;
+import jiekie.util.NumberUtil;
 import jiekie.util.SoundUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -13,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
@@ -24,33 +26,27 @@ public class CheckCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(!(sender instanceof Player)) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+        if(!(sender instanceof Player player)) {
             ChatUtil.notPlayer(sender);
             return true;
         }
 
-        Player player = (Player) sender;
         if(args == null || args.length == 0) {
             ChatUtil.checkCommandHelper(player);
             return true;
         }
 
-        switch(args[0]) {
-            case "도움말":
-                ChatUtil.checkCommandList(player);
-                break;
-
-            default:
-                createCheck(player, args);
-                break;
-        }
+        if (args[0].equals("도움말"))
+            ChatUtil.checkCommandList(player);
+        else
+            createCheck(player, args);
 
         return true;
     }
 
     private void createCheck(Player player, String[] args) {
-        int amountOfMoney = 0;
+        int amountOfMoney;
         int amountOfItem = 1;
 
         try {
@@ -98,7 +94,7 @@ public class CheckCommand implements CommandExecutor {
 
         ItemStack check = new ItemStack(Material.PAPER);
         ItemMeta meta = check.getItemMeta();
-        meta.setDisplayName(ChatColor.RESET + moneyManager.getFormattedMoney(amountOfMoney));
+        meta.setDisplayName(ChatColor.RESET + NumberUtil.getFormattedMoney(amountOfMoney));
         meta.setCustomModelData(150);
         check.setItemMeta(meta);
         check.setAmount(amountOfItem);

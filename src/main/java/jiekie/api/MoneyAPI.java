@@ -1,7 +1,11 @@
 package jiekie.api;
 
 import jiekie.manager.MoneyManager;
+import jiekie.util.NumberUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class MoneyAPI {
@@ -31,6 +35,18 @@ public class MoneyAPI {
 
     public String getPlayerMoneyFormatted(UUID uuid) {
         int money = this.moneyManager.getMoney(uuid);
-        return this.moneyManager.getFormattedMoney(money);
+        return NumberUtil.getFormattedMoney(money);
+    }
+
+    public List<UUID> getTopRichestPlayers(int count) {
+        List<UUID> uuids = new ArrayList<>();
+
+        List<Map.Entry<UUID, Integer>> sortedMoneyList = this.moneyManager.getSortedMoneyList();
+        for(Map.Entry<UUID, Integer> entry : sortedMoneyList) {
+            uuids.add(entry.getKey());
+            if(uuids.size() >= count) break;
+        }
+
+        return uuids;
     }
 }

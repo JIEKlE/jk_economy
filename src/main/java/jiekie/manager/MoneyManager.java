@@ -4,6 +4,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import jiekie.EconomyPlugin;
 import jiekie.util.ChatUtil;
+import jiekie.util.NumberUtil;
 import jiekie.util.PacketNames;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -12,7 +13,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.NumberFormat;
 import java.util.*;
 
 public class MoneyManager {
@@ -37,7 +37,7 @@ public class MoneyManager {
                     ByteArrayDataOutput out = ByteStreams.newDataOutput();
 
                     int money = getMoney(player.getUniqueId());
-                    String formattedMoney = getFormattedMoney(money);
+                    String formattedMoney = NumberUtil.getFormattedMoney(money);
 
                     out.writeUTF(formattedMoney);
                     player.sendPluginMessage(plugin, PacketNames.MONEY_UPDATE, out.toByteArray());
@@ -64,25 +64,8 @@ public class MoneyManager {
 
     public void subtractMoney(UUID uuid, int money) {
         int previousMoney = moneyMap.getOrDefault(uuid, 0);
-        int currentMoney = previousMoney - money < 0 ? 0 : previousMoney - money;
+        int currentMoney = Math.max(previousMoney - money, 0);
         moneyMap.put(uuid, currentMoney);
-    }
-
-    public String getFormattedMoney(int money) {
-        NumberFormat formatter = NumberFormat.getInstance(Locale.KOREA);
-        formatter.setMaximumFractionDigits(0);
-        return formatter.format(money) + "원";
-    }
-
-    public int getUnformattedMoney(String money) {
-        if(money == null || money.equals("")) return 0;
-        String unformattedMoney = money.replaceAll("원", "").replaceAll(",", "");
-        try {
-            return Integer.parseInt(unformattedMoney);
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-            return 0;
-        }
     }
 
     public List<Map.Entry<UUID, Integer>> getSortedMoneyList() {

@@ -1,6 +1,5 @@
 package jiekie.completer;
 
-import jiekie.EconomyPlugin;
 import jiekie.api.NicknameAPI;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -14,17 +13,10 @@ import java.util.Collections;
 import java.util.List;
 
 public class MoneyTabCompleter implements TabCompleter {
-    private final EconomyPlugin plugin;
-
-    public MoneyTabCompleter(EconomyPlugin plugin) {
-        this.plugin = plugin;
-    }
-
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if(!(sender instanceof Player)) return Collections.emptyList();
-        Player player = (Player) sender;
-        
+        if(!(sender instanceof Player player)) return Collections.emptyList();
+
         int length = args.length;
         if(length == 1) {
             if(player.isOp())

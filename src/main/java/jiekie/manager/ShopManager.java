@@ -8,6 +8,7 @@ import jiekie.model.ShopItem;
 import jiekie.model.ShopType;
 import jiekie.util.ChatUtil;
 import jiekie.util.ItemUtil;
+import jiekie.util.NumberUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -25,7 +26,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.text.NumberFormat;
 import java.util.*;
 
 public class ShopManager {
@@ -155,7 +155,6 @@ public class ShopManager {
         ShopInventoryHolder holder = new ShopInventoryHolder(name, isSettingMode);
         Inventory inventory = Bukkit.createInventory(holder, size, chestName);
 
-        Map<Integer, ShopItem> items = shop.getItems();
         if(isSettingMode)
             setInventoryForSetting(inventory, name);
         else
@@ -227,7 +226,7 @@ public class ShopManager {
     }
 
     private String buildBuyPriceLore(ShopItem item, ShopType type) {
-        String buyPrice = (item.getCurrentBuyPrice() > 0) ? getFormattedPrice(item.getCurrentBuyPrice()) : "구매금지";
+        String buyPrice = (item.getCurrentBuyPrice() > 0) ? NumberUtil.getFormattedMoney(item.getCurrentBuyPrice()) : "구매금지";
         if(type == ShopType.MARKET && item.getCurrentBuyPrice() > 0) {
             buyPrice += " " + formatFluctuation(item.getBuyFluctuationPercent());
         }
@@ -236,7 +235,7 @@ public class ShopManager {
     }
 
     private String buildSellPriceLore(ShopItem item, ShopType type) {
-        String sellPrice = (item.getCurrentSellPrice() > 0) ? getFormattedPrice(item.getCurrentSellPrice()) : "판매금지";
+        String sellPrice = (item.getCurrentSellPrice() > 0) ? NumberUtil.getFormattedMoney(item.getCurrentSellPrice()) : "판매금지";
         if(type == ShopType.MARKET && item.getCurrentSellPrice() > 0) {
             sellPrice += " " + formatFluctuation(item.getSellFluctuationPercent());
         }
@@ -245,26 +244,19 @@ public class ShopManager {
     }
 
     private String buildOneStackBuyPrice(ShopItem item) {
-        String buyPrice = (item.getCurrentBuyPrice() > 0) ? getFormattedPrice(item.getCurrentBuyPrice() * 64) : "구매금지";
+        String buyPrice = (item.getCurrentBuyPrice() > 0) ? NumberUtil.getFormattedMoney(item.getCurrentBuyPrice() * 64) : "구매금지";
         return ChatColor.LIGHT_PURPLE + "64개 구매가격" + ChatColor.WHITE + " : " + buyPrice;
     }
 
     private String buildOneStackSellPrice(ShopItem item) {
-        String sellPrice = (item.getCurrentSellPrice() > 0) ? getFormattedPrice(item.getCurrentSellPrice() * 64) : "판매금지";
+        String sellPrice = (item.getCurrentSellPrice() > 0) ? NumberUtil.getFormattedMoney(item.getCurrentSellPrice() * 64) : "판매금지";
         return ChatColor.AQUA + "64개 판매가격" + ChatColor.WHITE + " : " + sellPrice;
     }
 
     private String formatFluctuation(int fluctuation) {
         if(fluctuation > 0) return ChatColor.GREEN + "[ ▲ " + fluctuation + "% ]";
         if(fluctuation == 0) return ChatColor.YELLOW + "[ - ]";
-        if(fluctuation < 0) return ChatColor.RED + "[ ▼ " + fluctuation + "% ]";
-        return "";
-    }
-
-    public String getFormattedPrice(int price) {
-        NumberFormat formatter = NumberFormat.getInstance(Locale.KOREA);
-        formatter.setMaximumFractionDigits(0);
-        return formatter.format(price) + "원";
+        return ChatColor.RED + "[ ▼ " + fluctuation + "% ]";
     }
 
     public void createShop(String name, String typeDisplayName, String sizeString) throws ShopException {
@@ -338,7 +330,7 @@ public class ShopManager {
             throw new ShopException(ChatUtil.wrongCommand() + " (/상점 구매가격설정 상점명 슬롯번호 기본가 최고가 최저가)");
 
         String slotString = args[2];
-        ShopItem item = getSlotItem(shop, getSlotFromString(slotString));
+        ShopItem item = getShopItemOrThrow(name, getSlotFromString(slotString));
 
         item.setCurrentBuyPrice(getPriceFromString(args[3]));
         if(shop.getType() == ShopType.MARKET) {
@@ -355,7 +347,7 @@ public class ShopManager {
             throw new ShopException(ChatUtil.wrongCommand() + " (/상점 판매가격설정 상점명 슬롯번호 기본가 최고가 최저가)");
 
         String slotString = args[2];
-        ShopItem item = getSlotItem(shop, getSlotFromString(slotString));
+        ShopItem item = getShopItemOrThrow(name, getSlotFromString(slotString));
 
         item.setCurrentSellPrice(getPriceFromString(args[3]));
         if(shop.getType() == ShopType.MARKET) {
@@ -366,8 +358,7 @@ public class ShopManager {
     }
 
     public void setStock(String name, String slotString, String stockString) throws ShopException {
-        Shop shop = getShopOrThrow(name);
-        ShopItem item = getSlotItem(shop, getSlotFromString(slotString));
+        ShopItem item = getShopItemOrThrow(name, getSlotFromString(slotString));
 
         int stock = getStockFromString(stockString);
         item.setMaxStock(stock);
@@ -379,7 +370,7 @@ public class ShopManager {
         if(shop.getType() != ShopType.MARKET)
             throw new ShopException(ChatUtil.NOT_MARKET_SHOP);
 
-        ShopItem item = getSlotItem(shop, getSlotFromString(slotString));
+        ShopItem item = getShopItemOrThrow(name, getSlotFromString(slotString));
 
         int fluctuation = getFluctuationFromString(fluctuationString);
         item.setMaxFluctuationRate(fluctuation);
@@ -475,7 +466,7 @@ public class ShopManager {
     }
 
     private int getInventorySizeFromString(String sizeString) throws ShopException {
-        int size = 0;
+        int size;
         try {
             size = Integer.parseInt(sizeString);
         } catch (NumberFormatException e) {
@@ -495,7 +486,7 @@ public class ShopManager {
     }
 
     private int getIntervalFromString(String intervalString) throws ShopException {
-        int interval = 0;
+        int interval;
         try {
             interval = Integer.parseInt(intervalString);
         } catch (NumberFormatException e) {
@@ -512,7 +503,7 @@ public class ShopManager {
     }
 
     private int getSlotFromString(String slotString) throws ShopException {
-        int slot = 0;
+        int slot;
         try {
             slot = Integer.parseInt(slotString);
         } catch (NumberFormatException e) {
@@ -529,7 +520,7 @@ public class ShopManager {
     }
 
     private int getPriceFromString(String moneyString) throws ShopException {
-        int money = 0;
+        int money;
         try {
             money = Integer.parseInt(moneyString);
         } catch (NumberFormatException e) {
@@ -543,7 +534,7 @@ public class ShopManager {
     }
 
     private int getStockFromString(String stockString) throws ShopException {
-        int stock = 0;
+        int stock;
         try {
             stock = Integer.parseInt(stockString);
         } catch (NumberFormatException e) {
@@ -557,7 +548,7 @@ public class ShopManager {
     }
 
     private int getFluctuationFromString(String fluctuationString) throws ShopException {
-        int fluctuation = 0;
+        int fluctuation;
         try {
             fluctuation = Integer.parseInt(fluctuationString);
         } catch (NumberFormatException e) {
@@ -568,17 +559,6 @@ public class ShopManager {
             throw new ShopException(ChatUtil.MINUS_FLUCTUATION);
 
         return fluctuation;
-    }
-
-    private ShopItem getSlotItem(Shop shop, int slot) throws ShopException {
-        Map<Integer, ShopItem> items = shop.getItems();
-        if(items == null || items.isEmpty())
-            throw new ShopException(ChatUtil.NO_ITEM_IN_SHOP);
-
-        if(!items.containsKey(slot))
-            throw new ShopException(ChatUtil.NO_ITEM_IN_SHOP);
-
-        return items.get(slot);
     }
 
     /* tab completer */

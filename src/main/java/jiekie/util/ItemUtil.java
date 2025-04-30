@@ -24,8 +24,6 @@ public class ItemUtil {
         if(!(metaA instanceof Damageable) || !(metaB instanceof Damageable)) return true;
         Damageable damageableA = (Damageable) metaA;
         Damageable damageableB = (Damageable) metaB;
-        if(damageableA.getDamage() != damageableB.getDamage()) return false;
-
-        return true;
+        return damageableA.getDamage() == damageableB.getDamage();
     }
 }

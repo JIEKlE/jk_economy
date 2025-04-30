@@ -2,6 +2,7 @@ package jiekie.event;
 
 import jiekie.EconomyPlugin;
 import jiekie.manager.MoneyManager;
+import jiekie.util.NumberUtil;
 import jiekie.util.SoundUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -45,6 +46,7 @@ public class PlayerEvent implements Listener {
     }
 
     private void removeCheck(PlayerInteractEvent e) {
+        if(e.getHand() == null) return;
         if(!e.getHand().equals(EquipmentSlot.HAND)) return;
         if(e.getAction() != Action.RIGHT_CLICK_AIR  && e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         
@@ -52,14 +54,14 @@ public class PlayerEvent implements Listener {
         PlayerInventory inventory = player.getInventory();
         ItemStack item = inventory.getItemInMainHand();
 
-        if(item == null || item.getType() != Material.PAPER) return;
+        if(item.getType() != Material.PAPER) return;
 
         ItemMeta meta = item.getItemMeta();
         if(meta == null || !meta.hasDisplayName()) return;
         if(meta.getCustomModelData() != 150) return;
 
         MoneyManager moneyManager = plugin.getMoneyManager();
-        int amountOfMoney = moneyManager.getUnformattedMoney(meta.getDisplayName());
+        int amountOfMoney = NumberUtil.getUnformattedMoney(meta.getDisplayName());
         int amountOfItem = 1;
         if(player.isSneaking())
             amountOfItem = item.getAmount();

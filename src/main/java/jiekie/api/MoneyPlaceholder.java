@@ -1,6 +1,7 @@
 package jiekie.api;
 
 import jiekie.EconomyPlugin;
+import jiekie.util.NumberUtil;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -45,15 +46,10 @@ public class MoneyPlaceholder extends PlaceholderExpansion {
         }
 
         int money = plugin.getMoneyManager().getMoney(player.getUniqueId());
-        switch(params) {
-            case "money":
-                return String.valueOf(money);
-
-            case "formatted_money":
-                return plugin.getMoneyManager().getFormattedMoney(money);
-
-            default:
-                return null;
-        }
+        return switch (params) {
+            case "money" -> String.valueOf(money);
+            case "formatted_money" -> NumberUtil.getFormattedMoney(money);
+            default -> null;
+        };
     }
 }
