@@ -5,7 +5,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.Random;
 
 public class ShopItem {
-    private final ItemStack item;
+    private ItemStack item;
     private int currentBuyPrice;
     private int currentSellPrice;
     private int maxStock;
@@ -26,6 +26,10 @@ public class ShopItem {
 
     public ItemStack getItem() {
         return item;
+    }
+
+    public void setItem(ItemStack itemStack) {
+        this.item = itemStack;
     }
 
     public int getCurrentBuyPrice() {

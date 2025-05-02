@@ -19,11 +19,11 @@ public class ChatUtil {
 
     public static String MINUS_MONEY = "금액은 0 이상만 입력 가능합니다.";
     public static String MINUS_AMOUNT_OF_ITEM = "개수는 0 이상만 입력 가능합니다.";
-    public static String MINUS_SLOT = "슬롯 번호는 0 이상만 입력 가능합니다.";
     public static String MINUS_STOCK = "재고는 0 이상만 입력 가능합니다.";
     public static String MINUS_FLUCTUATION = "변동률은 0 이상만 입력 가능합니다.";
     public static String INTERVAL_LESS_THAN_ONE = "변동 주기는 1 이상만 입력 가능합니다.";
-    public static String SLOT_MORE_THAN_FULL = "슬롯 번호는 53 이하만 입력 가능합니다.";
+    public static String SLOT_LESS_THAN_ONE = "슬롯 번호는 1 이상만 입력 가능합니다.";
+    public static String SLOT_MORE_THAN_FULL = "슬롯 번호는 54 이하만 입력 가능합니다.";
     public static String INVENTORY_SIZE_LESS_THAN_ONE = "인벤토리 수는 1 이상만 입력 가능합니다.";
     public static String INVENTORY_SIZE_MORE_THAN_FULL = "인벤토리 수는 54 이하만 입력 가능합니다.";
 
@@ -163,12 +163,12 @@ public class ChatUtil {
         sender.sendMessage(getWarnPrefix() + "상점의 변동 주기를 설정했습니다.");
     }
 
-    public static void setGuiTemplate(CommandSender sender) {
-        sender.sendMessage(getWarnPrefix() + "상점의 GUI 템플릿을 설정했습니다.");
+    public static void setGui(CommandSender sender) {
+        sender.sendMessage(getWarnPrefix() + "상점의 GUI를 설정했습니다.");
     }
 
-    public static void resetGuiTemplate(CommandSender sender) {
-        sender.sendMessage(getWarnPrefix() + "상점의 GUI 템플릿을 해제했습니다.");
+    public static void resetGui(CommandSender sender) {
+        sender.sendMessage(getWarnPrefix() + "상점의 GUI를 해제했습니다.");
     }
 
     public static void setBuyPrice(CommandSender sender) {
@@ -307,15 +307,15 @@ public class ChatUtil {
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 상점을 열 수 있는 권한을 설정합니다. (공백일 경우 권한 해제)");
         sender.sendMessage("　　　⑦ /상점 변동주기설정 상점명 숫자(분)");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 상점의 시세 변동 주기를 설정합니다. (10분 단위로 설정)");
-        sender.sendMessage("　　　⑧ /상점 템플릿설정 상점명 [템플릿ID]");
-        sender.sendMessage(ChatColor.GRAY + "　　　　　: 상점의 GUI 템플릿을 등록합니다. (공백일 경우 템플릿 해제)");
+        sender.sendMessage("　　　⑧ /상점 GUI설정 상점명 [GUI_ID]");
+        sender.sendMessage(ChatColor.GRAY + "　　　　　: 상점의 GUI를 등록합니다. (공백일 경우 GUI 해제)");
         sender.sendMessage("　　　⑨ /상점 아이템설정 상점명");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 상점 인벤토리를 열어 구매·판매 물품을 설정합니다.");
         sender.sendMessage("　　　⑩ /상점 구매가격설정 상점명 슬롯번호 기본가 [최고가] [최저가]");
-        sender.sendMessage(ChatColor.GRAY + "　　　　　: 물품의 구매가격을 설정합니다. (0원으로 설정 시 구매 금지)");
+        sender.sendMessage(ChatColor.GRAY + "　　　　　: 물품의 구매 가격을 설정합니다. (0원으로 설정 시 구매 금지)");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 시세 상점일 경우 최고가와 최저가도 모두 설정해야 합니다.");
         sender.sendMessage("　　　⑪ /상점 판매가격설정 상점명 슬롯번호 기본가 [최고가] [최저가]");
-        sender.sendMessage(ChatColor.GRAY + "　　　　　: 물품의 판매가격을 설정합니다. (0원으로 설정 시 판매 금지)");
+        sender.sendMessage(ChatColor.GRAY + "　　　　　: 물품의 판매 가격을 설정합니다. (0원으로 설정 시 판매 금지)");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 시세 상점일 경우 최고가와 최저가도 모두 설정해야 합니다.");
         sender.sendMessage("　　　⑫ /상점 재고설정 상점명 슬롯번호 재고");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 물품의 재고를 설정합니다. (0으로 설정 시 무제한)");
@@ -328,7 +328,7 @@ public class ChatUtil {
         sender.sendMessage("　　　⑯ /상점 가격초기화 상점명");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 물품의 가격을 기본가로 초기화합니다.");
         sender.sendMessage("　　　⑰ /상점 정보 상점명");
-        sender.sendMessage(ChatColor.GRAY + "　　　　　: 물품의 가격을 기본가로 초기화합니다.");
+        sender.sendMessage(ChatColor.GRAY + "　　　　　: 상점의 정보를 조회합니다.");
         sender.sendMessage("　　　⑱ /상점 도움말");
         sender.sendMessage(ChatColor.GRAY + "　　　　　: 사용 가능한 명령어를 확인할 수 있습니다.");
     }

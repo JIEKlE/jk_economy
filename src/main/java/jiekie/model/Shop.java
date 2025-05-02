@@ -13,7 +13,7 @@ public class Shop {
     private long nextUpdateTime;
     private String englishPermission;
     private String koreanPermission;
-    private String templateId;
+    private String guiId;
     private Map<Integer, ShopItem> items;
 
     public Shop(String name, ShopType type, int size) {
@@ -90,12 +90,12 @@ public class Shop {
         this.koreanPermission = koreanPermission;
     }
 
-    public String getTemplateId() {
-        return templateId;
+    public String getGuiId() {
+        return guiId;
     }
 
-    public void setTemplateId(String templateId) {
-        this.templateId = templateId;
+    public void setGuiId(String guiId) {
+        this.guiId = guiId;
     }
 
     public Map<Integer, ShopItem> getItems() {

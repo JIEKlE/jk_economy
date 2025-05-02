@@ -21,6 +21,9 @@ public class ItemUtil {
         if(metaA.hasCustomModelData() != metaB.hasCustomModelData()) return false;
         if(metaA.hasCustomModelData() && metaA.getCustomModelData() != metaB.getCustomModelData()) return false;
 
+        if(metaA.hasLore() != metaB.hasLore()) return false;
+        if(metaA.hasLore() && !metaA.getLore().equals(metaB.getLore())) return false;
+
         if(!(metaA instanceof Damageable) || !(metaB instanceof Damageable)) return true;
         Damageable damageableA = (Damageable) metaA;
         Damageable damageableB = (Damageable) metaB;

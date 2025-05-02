@@ -66,7 +66,7 @@ public class ShopManager {
             shop.setEnabled(shopSection.getBoolean(name + ".enabled"));
             shop.setEnglishPermission(shopSection.getString(name + ".english_permission", null));
             shop.setKoreanPermission(shopSection.getString(name + ".korean_permission", null));
-            shop.setTemplateId(shopSection.getString(name + ".template_id", null));
+            shop.setGuiId(shopSection.getString(name + ".gui_id", null));
 
             if(type == ShopType.MARKET) {
                 int interval = shopSection.getInt(name + ".interval");
@@ -145,11 +145,13 @@ public class ShopManager {
             throw new ShopException(ChatUtil.SHOP_DISABLED);
 
         String englishPermission = shop.getEnglishPermission();
-        if(englishPermission != null && !player.hasPermission(englishPermission))
-            throw new ShopException(ChatUtil.NO_PERMISSION);
+        if(englishPermission != null && !player.hasPermission(englishPermission)) {
+            String permission = shop.getKoreanPermission() == null ? englishPermission : shop.getKoreanPermission();
+            throw new ShopException(ChatUtil.NO_PERMISSION + " (필요 권한 : " + permission + ")");
+        }
 
-        String templateId = shop.getTemplateId();
-        String chestName = templateId == null ? "" : ":offset_-16::" + templateId + ":";
+        String guiId = shop.getGuiId();
+        String chestName = guiId == null ? "" : ":offset_-16::" + guiId + ":";
         int size = shop.getSize();
 
         ShopInventoryHolder holder = new ShopInventoryHolder(name, isSettingMode);
@@ -318,9 +320,9 @@ public class ShopManager {
         shop.setInterval(interval);
     }
 
-    public void setGuiTemplate(String name, String templateId) throws ShopException {
+    public void setGuiTemplate(String name, String guiId) throws ShopException {
         Shop shop = getShopOrThrow(name);
-        shop.setTemplateId(templateId);
+        shop.setGuiId(guiId);
     }
 
     public void setBuyPrice(String[] args) throws ShopException {
@@ -427,17 +429,20 @@ public class ShopManager {
             }
 
             ShopItem existingShopItem = items.get(i);
-            if(existingShopItem != null && ItemUtil.isSameItem(item, existingShopItem.getItem())) continue;
-
             ItemStack slotItem = item.clone();
             slotItem.setAmount(1);
+
+            if(existingShopItem != null) {
+                if(!ItemUtil.isSameItem(item, existingShopItem.getItem()))
+                    existingShopItem.setItem(slotItem);
+                continue;
+            }
 
             ShopItem shopItem = new ShopItem(slotItem);
             items.put(i, shopItem);
         }
 
         removeList.forEach(items::remove);
-
         shop.setItems(items);
     }
 
@@ -510,13 +515,13 @@ public class ShopManager {
             throw new ShopException(ChatUtil.SLOT_NOT_NUMBER);
         }
 
-        if(slot < 0)
-            throw new ShopException(ChatUtil.MINUS_SLOT);
+        if(slot < 1)
+            throw new ShopException(ChatUtil.SLOT_LESS_THAN_ONE);
 
-        if(slot >= 54)
+        if(slot > 54)
             throw new ShopException(ChatUtil.SLOT_MORE_THAN_FULL);
 
-        return slot;
+        return slot - 1;
     }
 
     private int getPriceFromString(String moneyString) throws ShopException {
@@ -586,7 +591,7 @@ public class ShopManager {
             config.set(path + ".enabled", shop.isEnabled());
             config.set(path + ".english_permission", shop.getEnglishPermission());
             config.set(path + ".korean_permission", shop.getKoreanPermission());
-            config.set(path + ".template_id", shop.getTemplateId());
+            config.set(path + ".gui_id", shop.getGuiId());
 
             if(type == ShopType.MARKET)
                 config.set(path + ".interval", shop.getInterval());

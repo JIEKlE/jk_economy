@@ -29,7 +29,7 @@ public class ShopTabCompleter implements TabCompleter {
         int length = args.length;
         if(length == 1) {
             return Arrays.asList("열기", "생성", "제거", "활성화", "비활성화"
-                    , "인벤토리수설정", "권한설정", "변동주기설정", "템플릿설정", "아이템설정"
+                    , "인벤토리수설정", "권한설정", "변동주기설정", "GUI설정", "아이템설정"
                     , "구매가격설정", "판매가격설정", "재고설정", "최대변동률설정", "재고초기화"
                     , "아이템초기화", "가격초기화", "정보", "도움말");
         }
@@ -55,8 +55,8 @@ public class ShopTabCompleter implements TabCompleter {
                 case "변동주기설정" -> {
                     return Arrays.asList("30", "60", "90");
                 }
-                case "템플릿설정" -> {
-                    return List.of("템플릿ID");
+                case "GUI설정" -> {
+                    return List.of("GUI_ID");
                 }
                 case "구매가격설정", "판매가격설정", "재고설정", "최대변동룰설정" -> {
                     return List.of("슬롯번호");

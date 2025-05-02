@@ -36,7 +36,7 @@ public class ShopCommand implements CommandExecutor {
         commandMap.put("인벤토리수설정", this::setInventorySize);
         commandMap.put("권한설정", this::setPermission);
         commandMap.put("변동주기설정", this::setInterval);
-        commandMap.put("템플릿설정", this::setGuiTemplate);
+        commandMap.put("GUI설정", this::setGui);
         commandMap.put("아이템설정", this::setItems);
         commandMap.put("구매가격설정", this::setBuyPrice);
         commandMap.put("판매가격설정", this::setSellPrice);
@@ -244,12 +244,12 @@ public class ShopCommand implements CommandExecutor {
         }
     }
 
-    private void setGuiTemplate(CommandContext context) {
+    private void setGui(CommandContext context) {
         CommandSender sender = context.sender();
         String[] args = context.args();
 
         if(args.length < 2) {
-            sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 템플릿설정 상점명 GUI명)");
+            sender.sendMessage(ChatUtil.wrongCommand() + " (/상점 GUI설정 상점명 [GUI_ID])");
             return;
         }
 
@@ -257,13 +257,13 @@ public class ShopCommand implements CommandExecutor {
         if(player == null) return;
 
         try {
-            String templateId = args.length > 2 ? args[2] : null;
-            plugin.getShopManager().setGuiTemplate(args[1], templateId);
+            String guiId = args.length > 2 ? args[2] : null;
+            plugin.getShopManager().setGuiTemplate(args[1], guiId);
 
-            if(templateId == null)
-                ChatUtil.resetGuiTemplate(player);
+            if(guiId == null)
+                ChatUtil.resetGui(player);
             else
-                ChatUtil.setGuiTemplate(player);
+                ChatUtil.setGui(player);
 
             SoundUtil.playNoteBlockBell(player);
 
