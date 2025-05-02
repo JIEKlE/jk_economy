@@ -225,9 +225,9 @@ public class ChatUtil {
         sender.sendMessage("　활성화여부 : " + enable);
         
         if(shop.getEnglishPermission() != null)
-            sender.sendMessage("　영어 권한명 : " + shop.getName());
+            sender.sendMessage("　영어 권한명 : " + shop.getEnglishPermission());
         if(shop.getKoreanPermission() != null)
-            sender.sendMessage("　한글 권한명 : " + shop.getName());
+            sender.sendMessage("　한글 권한명 : " + shop.getKoreanPermission());
         
         if(shop.getType() == ShopType.MARKET) {
             sender.sendMessage("　변동 주기 : " + shop.getInterval() + "분");
