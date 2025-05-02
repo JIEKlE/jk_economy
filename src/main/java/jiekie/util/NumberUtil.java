@@ -11,7 +11,7 @@ public class NumberUtil {
     }
 
     public static int getUnformattedMoney(String money) {
-        if(money.isBlank()) return 0;
+        if(money == null || money.isBlank()) return 0;
         String unformattedMoney = money.replaceAll("원", "").replaceAll(",", "");
         try {
             return Integer.parseInt(unformattedMoney);
