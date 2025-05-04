@@ -90,7 +90,7 @@ public class ShopCommand implements CommandExecutor {
             String targetPlayerName = StringUtil.getContents(args, 2);
             targetPlayer = NicknameAPI.getInstance().getPlayerByNameOrNickname(targetPlayerName);
             if(targetPlayer == null) {
-                ChatUtil.showErrorMessage(sender, ChatUtil.PLAYER_NOT_FOUND);
+                ChatUtil.showMessage(sender, ChatUtil.PLAYER_NOT_FOUND);
                 return;
             }
         }
@@ -98,7 +98,7 @@ public class ShopCommand implements CommandExecutor {
         try {
             plugin.getShopManager().openShop(targetPlayer, args[1], false);
         } catch (ShopException e) {
-            ChatUtil.showErrorMessage(targetPlayer, e.getMessage());
+            ChatUtil.showMessage(targetPlayer, e.getMessage());
         }
     }
 
@@ -116,11 +116,11 @@ public class ShopCommand implements CommandExecutor {
 
         try {
             plugin.getShopManager().createShop(args[1], args[2], args[3]);
-            ChatUtil.createShop(player);
+            ChatUtil.showMessage(player, ChatUtil.CREATE_SHOP);
             SoundUtil.playNoteBlockBell(player);
 
         } catch (ShopException e) {
-            ChatUtil.showErrorMessage(sender, e.getMessage());
+            ChatUtil.showMessage(sender, e.getMessage());
         }
     }
 
@@ -138,11 +138,11 @@ public class ShopCommand implements CommandExecutor {
 
         try {
             plugin.getShopManager().removeShop(args[1]);
-            ChatUtil.removeShop(player);
+            ChatUtil.showMessage(player, ChatUtil.REMOVE_SHOP);
             SoundUtil.playNoteBlockBell(player);
 
         } catch (ShopException e) {
-            ChatUtil.showErrorMessage(sender, e.getMessage());
+            ChatUtil.showMessage(sender, e.getMessage());
         }
     }
 
@@ -162,13 +162,13 @@ public class ShopCommand implements CommandExecutor {
             plugin.getShopManager().activateShop(args[1], activate);
 
             if(activate)
-                ChatUtil.activateShop(player);
+                ChatUtil.showMessage(player, ChatUtil.ACTIVATE_SHOP);
             else
-                ChatUtil.deactivateShop(player);
+                ChatUtil.showMessage(player, ChatUtil.DEACTIVATE_SHOP);
             SoundUtil.playNoteBlockBell(player);
 
         } catch (ShopException e) {
-            ChatUtil.showErrorMessage(sender, e.getMessage());
+            ChatUtil.showMessage(sender, e.getMessage());
         }
     }
 
@@ -186,11 +186,11 @@ public class ShopCommand implements CommandExecutor {
 
         try {
             plugin.getShopManager().setInventorySize(args[1], args[2]);
-            ChatUtil.setInventorySize(player);
+            ChatUtil.showMessage(player, ChatUtil.SET_INVENTORY_SIZE);
             SoundUtil.playNoteBlockBell(player);
 
         } catch (ShopException e) {
-            ChatUtil.showErrorMessage(sender, e.getMessage());
+            ChatUtil.showMessage(sender, e.getMessage());
         }
     }
 
@@ -210,15 +210,15 @@ public class ShopCommand implements CommandExecutor {
             plugin.getShopManager().setPermission(args[1], englishPermission, koreanPermission);
 
             if(setPermission)
-                ChatUtil.setPermission(sender);
+                ChatUtil.showMessage(sender, ChatUtil.SET_PERMISSION);
             else
-                ChatUtil.resetPermission(sender);
+                ChatUtil.showMessage(sender, ChatUtil.RESET_PERMISSION);
 
             if(sender instanceof Player)
                 SoundUtil.playNoteBlockBell((Player) sender);
 
         } catch (ShopException e) {
-            ChatUtil.showErrorMessage(sender, e.getMessage());
+            ChatUtil.showMessage(sender, e.getMessage());
         }
     }
 
@@ -236,11 +236,11 @@ public class ShopCommand implements CommandExecutor {
 
         try {
             plugin.getShopManager().setInterval(args[1], args[2]);
-            ChatUtil.setInterval(player);
+            ChatUtil.showMessage(player, ChatUtil.SET_INTERVAL);
             SoundUtil.playNoteBlockBell(player);
 
         } catch (ShopException e) {
-            ChatUtil.showErrorMessage(sender, e.getMessage());
+            ChatUtil.showMessage(sender, e.getMessage());
         }
     }
 
@@ -261,14 +261,14 @@ public class ShopCommand implements CommandExecutor {
             plugin.getShopManager().setGuiTemplate(args[1], guiId);
 
             if(guiId == null)
-                ChatUtil.resetGui(player);
+                ChatUtil.showMessage(player, ChatUtil.RESET_GUI);
             else
-                ChatUtil.setGui(player);
+                ChatUtil.showMessage(player, ChatUtil.SET_GUI);
 
             SoundUtil.playNoteBlockBell(player);
 
         } catch (ShopException e) {
-            ChatUtil.showErrorMessage(sender, e.getMessage());
+            ChatUtil.showMessage(sender, e.getMessage());
         }
     }
 
@@ -287,7 +287,7 @@ public class ShopCommand implements CommandExecutor {
         try {
             plugin.getShopManager().openShop(player, args[1], true);
         } catch (ShopException e) {
-            ChatUtil.showErrorMessage(sender, e.getMessage());
+            ChatUtil.showMessage(sender, e.getMessage());
         }
     }
 
@@ -305,11 +305,11 @@ public class ShopCommand implements CommandExecutor {
 
         try {
             plugin.getShopManager().setBuyPrice(args);
-            ChatUtil.setBuyPrice(player);
+            ChatUtil.showMessage(player, ChatUtil.SET_BUY_PRICE);
             SoundUtil.playNoteBlockBell(player);
 
         } catch (ShopException e) {
-            ChatUtil.showErrorMessage(sender, e.getMessage());
+            ChatUtil.showMessage(sender, e.getMessage());
         }
     }
 
@@ -327,11 +327,11 @@ public class ShopCommand implements CommandExecutor {
 
         try {
             plugin.getShopManager().setSellPrice(args);
-            ChatUtil.setSellPrice(player);
+            ChatUtil.showMessage(player, ChatUtil.SET_SELL_PRICE);
             SoundUtil.playNoteBlockBell(player);
 
         } catch (ShopException e) {
-            ChatUtil.showErrorMessage(sender, e.getMessage());
+            ChatUtil.showMessage(sender, e.getMessage());
         }
     }
 
@@ -349,11 +349,11 @@ public class ShopCommand implements CommandExecutor {
 
         try {
             plugin.getShopManager().setStock(args[1], args[2], args[3]);
-            ChatUtil.setStock(player);
+            ChatUtil.showMessage(player, ChatUtil.SET_STOCK);
             SoundUtil.playNoteBlockBell(player);
 
         } catch (ShopException e) {
-            ChatUtil.showErrorMessage(sender, e.getMessage());
+            ChatUtil.showMessage(sender, e.getMessage());
         }
     }
 
@@ -371,11 +371,11 @@ public class ShopCommand implements CommandExecutor {
 
         try {
             plugin.getShopManager().setMaxFluctuation(args[1], args[2], args[3]);
-            ChatUtil.setMaxFluctuation(player);
+            ChatUtil.showMessage(player, ChatUtil.SET_MAX_FLUCTUATION);
             SoundUtil.playNoteBlockBell(player);
 
         } catch (ShopException e) {
-            ChatUtil.showErrorMessage(sender, e.getMessage());
+            ChatUtil.showMessage(sender, e.getMessage());
         }
     }
 
@@ -393,11 +393,11 @@ public class ShopCommand implements CommandExecutor {
 
         try {
             plugin.getShopManager().resetStock(args[1]);
-            ChatUtil.resetStock(player);
+            ChatUtil.showMessage(player, ChatUtil.RESET_STOCK);
             SoundUtil.playNoteBlockBell(player);
 
         } catch (ShopException e) {
-            ChatUtil.showErrorMessage(sender, e.getMessage());
+            ChatUtil.showMessage(sender, e.getMessage());
         }
     }
 
@@ -415,11 +415,11 @@ public class ShopCommand implements CommandExecutor {
 
         try {
             plugin.getShopManager().resetItems(args[1]);
-            ChatUtil.resetItems(player);
+            ChatUtil.showMessage(player, ChatUtil.RESET_ITEMS);
             SoundUtil.playNoteBlockBell(player);
 
         } catch (ShopException e) {
-            ChatUtil.showErrorMessage(sender, e.getMessage());
+            ChatUtil.showMessage(sender, e.getMessage());
         }
     }
 
@@ -437,11 +437,11 @@ public class ShopCommand implements CommandExecutor {
 
         try {
             plugin.getShopManager().resetPrice(args[1]);
-            ChatUtil.resetPrice(player);
+            ChatUtil.showMessage(player, ChatUtil.RESET_PRICE);
             SoundUtil.playNoteBlockBell(player);
 
         } catch (ShopException e) {
-            ChatUtil.showErrorMessage(sender, e.getMessage());
+            ChatUtil.showMessage(sender, e.getMessage());
         }
     }
 
@@ -465,7 +465,7 @@ public class ShopCommand implements CommandExecutor {
                 SoundUtil.playNoteBlockBell((Player) sender);
 
         } catch (ShopException e) {
-            ChatUtil.showErrorMessage(sender, e.getMessage());
+            ChatUtil.showMessage(sender, e.getMessage());
         }
     }
 

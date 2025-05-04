@@ -83,7 +83,7 @@ public class MoneyCommand implements CommandExecutor {
             targetPlayerName = StringUtil.getContents(args, 1);
             targetPlayer = NicknameAPI.getInstance().getPlayerByNameOrNickname(targetPlayerName);
             if(targetPlayer == null) {
-                ChatUtil.showErrorMessage(sender, ChatUtil.PLAYER_NOT_FOUND);
+                ChatUtil.showMessage(sender, ChatUtil.PLAYER_NOT_FOUND);
                 return;
             }
             targetPlayerUuid = targetPlayer.getUniqueId();
@@ -116,12 +116,12 @@ public class MoneyCommand implements CommandExecutor {
         try {
             amountOfMoney = Integer.parseInt(args[1]);
         } catch (NumberFormatException e) {
-            ChatUtil.showErrorMessage(player, ChatUtil.MONEY_NOT_NUMBER);
+            ChatUtil.showMessage(player, ChatUtil.MONEY_NOT_NUMBER);
             return;
         }
 
         if(amountOfMoney <= 0) {
-            ChatUtil.showErrorMessage(player, ChatUtil.MINUS_MONEY);
+            ChatUtil.showMessage(player, ChatUtil.MINUS_MONEY);
             return;
         }
 
@@ -129,14 +129,14 @@ public class MoneyCommand implements CommandExecutor {
         UUID playerUuid = player.getUniqueId();
         int playerMoney = moneyManager.getMoney(playerUuid);
         if(playerMoney < amountOfMoney) {
-            ChatUtil.showErrorMessage(player, ChatUtil.NOT_ENOUGH_MONEY);
+            ChatUtil.showMessage(player, ChatUtil.NOT_ENOUGH_MONEY);
             return;
         }
 
         String targetPlayerName = StringUtil.getContents(args, 2);
         Player targetPlayer = NicknameAPI.getInstance().getPlayerByNameOrNickname(targetPlayerName);
         if(targetPlayer == null) {
-            ChatUtil.showErrorMessage(player, ChatUtil.PLAYER_NOT_FOUND);
+            ChatUtil.showMessage(player, ChatUtil.PLAYER_NOT_FOUND);
             return;
         }
 
@@ -174,19 +174,19 @@ public class MoneyCommand implements CommandExecutor {
         try {
             amountOfMoney = Integer.parseInt(args[1]);
         } catch (NumberFormatException e) {
-            ChatUtil.showErrorMessage(sender, ChatUtil.MONEY_NOT_NUMBER);
+            ChatUtil.showMessage(sender, ChatUtil.MONEY_NOT_NUMBER);
             return;
         }
 
         if(!operation.equals("SET") && amountOfMoney <= 0) {
-            ChatUtil.showErrorMessage(sender, ChatUtil.MINUS_MONEY);
+            ChatUtil.showMessage(sender, ChatUtil.MINUS_MONEY);
             return;
         }
 
         String targetPlayerName = StringUtil.getContents(args, 2);
         Player targetPlayer = NicknameAPI.getInstance().getPlayerByNameOrNickname(targetPlayerName);
         if(targetPlayer == null) {
-            ChatUtil.showErrorMessage(sender, ChatUtil.PLAYER_NOT_FOUND);
+            ChatUtil.showMessage(sender, ChatUtil.PLAYER_NOT_FOUND);
             return;
         }
 
@@ -234,7 +234,7 @@ public class MoneyCommand implements CommandExecutor {
             try {
                 page = Integer.parseInt(args[1]);
             } catch (NumberFormatException e) {
-                ChatUtil.showErrorMessage(sender, ChatUtil.PAGE_NOT_NUMBER);
+                ChatUtil.showMessage(sender, ChatUtil.PAGE_NOT_NUMBER);
                 return;
             }
         }
@@ -246,7 +246,7 @@ public class MoneyCommand implements CommandExecutor {
         int end = Math.min(start + pageSize, sortedMoneyList.size());
 
         if(start >= sortedMoneyList.size()) {
-            ChatUtil.showErrorMessage(sender, ChatUtil.PAGE_DOES_NOT_EXIST);
+            ChatUtil.showMessage(sender, ChatUtil.PAGE_DOES_NOT_EXIST);
             return;
         }
 

@@ -52,12 +52,12 @@ public class CheckCommand implements CommandExecutor {
         try {
             amountOfMoney = Integer.parseInt(args[0]);
         } catch (NumberFormatException e) {
-            ChatUtil.showErrorMessage(player, ChatUtil.MONEY_NOT_NUMBER);
+            ChatUtil.showMessage(player, ChatUtil.MONEY_NOT_NUMBER);
             return;
         }
 
          if(amountOfMoney <= 0) {
-             ChatUtil.showErrorMessage(player, ChatUtil.MINUS_MONEY);
+             ChatUtil.showMessage(player, ChatUtil.MINUS_MONEY);
              return;
          }
 
@@ -65,12 +65,12 @@ public class CheckCommand implements CommandExecutor {
             try {
                 amountOfItem = Integer.parseInt(args[1]);
             } catch (NumberFormatException e) {
-                ChatUtil.showErrorMessage(player, ChatUtil.AMOUNT_OF_ITEM_NOT_NUMBER);
+                ChatUtil.showMessage(player, ChatUtil.AMOUNT_OF_ITEM_NOT_NUMBER);
                 return;
             }
 
             if(amountOfItem <= 0) {
-                ChatUtil.showErrorMessage(player, ChatUtil.MINUS_AMOUNT_OF_ITEM);
+                ChatUtil.showMessage(player, ChatUtil.MINUS_AMOUNT_OF_ITEM);
                 return;
             }
         }
@@ -80,13 +80,13 @@ public class CheckCommand implements CommandExecutor {
         int totalAmountOfMoney = amountOfMoney * amountOfItem;
         int playerMoney = moneyManager.getMoney(uuid);
         if(playerMoney < totalAmountOfMoney) {
-            ChatUtil.showErrorMessage(player, ChatUtil.NOT_ENOUGH_MONEY);
+            ChatUtil.showMessage(player, ChatUtil.NOT_ENOUGH_MONEY);
             return;
         }
 
         PlayerInventory inventory = player.getInventory();
         if(inventory.firstEmpty() == -1) {
-            ChatUtil.showErrorMessage(player, ChatUtil.INVENTORY_FULL);
+            ChatUtil.showMessage(player, ChatUtil.INVENTORY_FULL);
             return;
         }
 
@@ -100,7 +100,7 @@ public class CheckCommand implements CommandExecutor {
         check.setAmount(amountOfItem);
         inventory.addItem(check);
 
-        ChatUtil.createCheck(player);
+        ChatUtil.showMessage(player, ChatUtil.CREATE_CHECK);
         SoundUtil.playNoteBlockBell(player);
     }
 }

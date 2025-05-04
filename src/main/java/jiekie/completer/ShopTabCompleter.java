@@ -35,8 +35,15 @@ public class ShopTabCompleter implements TabCompleter {
         }
 
         String commandType = args[0];
-        if(length == 2 && !commandType.equals("도움말"))
-            return plugin.getShopManager().getShopNameList();
+        if(length == 2) {
+            if(commandType.equals("도움말"))
+                return Collections.emptyList();
+            if(commandType.equals("생성"))
+                return List.of("상점명");
+            else
+                return plugin.getShopManager().getShopNameList();
+        }
+
 
         if(length == 3) {
             switch (commandType) {
@@ -58,7 +65,7 @@ public class ShopTabCompleter implements TabCompleter {
                 case "GUI설정" -> {
                     return List.of("GUI_ID");
                 }
-                case "구매가격설정", "판매가격설정", "재고설정", "최대변동룰설정" -> {
+                case "구매가격설정", "판매가격설정", "재고설정", "최대변동률설정" -> {
                     return List.of("슬롯번호");
                 }
             }
@@ -78,7 +85,7 @@ public class ShopTabCompleter implements TabCompleter {
                 case "재고설정" -> {
                     return List.of("재고");
                 }
-                case "최대변동룰설정" -> {
+                case "최대변동률설정" -> {
                     return List.of("%");
                 }
             }

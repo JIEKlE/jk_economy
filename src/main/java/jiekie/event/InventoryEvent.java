@@ -63,18 +63,18 @@ public class InventoryEvent implements Listener {
             plugin.getShopManager().setInventoryForTrade(inventory, holder.name());
 
         } catch (ShopException ex) {
-            ChatUtil.showErrorMessage(player, ex.getMessage());
+            ChatUtil.showMessage(player, ex.getMessage());
         }
     }
 
     private void handleBuy(Player player, ShopItem shopItem, boolean shiftClick) {
         if(shopItem.getCurrentBuyPrice() <= 0) {
-            ChatUtil.showErrorMessage(player, ChatUtil.BUY_NOT_ALLOWED);
+            ChatUtil.showMessage(player, ChatUtil.BUY_NOT_ALLOWED);
             return;
         }
 
         if(player.getInventory().firstEmpty() == -1) {
-            ChatUtil.showErrorMessage(player, ChatUtil.INVENTORY_FULL);
+            ChatUtil.showMessage(player, ChatUtil.INVENTORY_FULL);
             return;
         }
 
@@ -85,14 +85,14 @@ public class InventoryEvent implements Listener {
                 amountOfItem = available;
 
             if(amountOfItem == 0) {
-                ChatUtil.showErrorMessage(player, ChatUtil.OUT_OF_STOCK);
+                ChatUtil.showMessage(player, ChatUtil.OUT_OF_STOCK);
                 return;
             }
         }
 
         int totalCost = shopItem.getCurrentBuyPrice() * amountOfItem;
         if(plugin.getMoneyManager().getMoney(player.getUniqueId()) < totalCost) {
-            ChatUtil.showErrorMessage(player, ChatUtil.NOT_ENOUGH_MONEY);
+            ChatUtil.showMessage(player, ChatUtil.NOT_ENOUGH_MONEY);
             return;
         }
 
@@ -114,7 +114,7 @@ public class InventoryEvent implements Listener {
 
     private void handleSell(Player player, ShopItem shopItem, boolean shiftClick) {
         if(shopItem.getCurrentSellPrice() <= 0) {
-            ChatUtil.showErrorMessage(player, ChatUtil.SELL_NOT_ALLOWED);
+            ChatUtil.showMessage(player, ChatUtil.SELL_NOT_ALLOWED);
             return;
         }
 
@@ -125,7 +125,7 @@ public class InventoryEvent implements Listener {
             amountOfItem = count;
 
         if(amountOfItem == 0) {
-            ChatUtil.showErrorMessage(player, ChatUtil.NO_ITEM_TO_SELL);
+            ChatUtil.showMessage(player, ChatUtil.NO_ITEM_TO_SELL);
             return;
         }
 
@@ -168,11 +168,11 @@ public class InventoryEvent implements Listener {
 
         try {
             plugin.getShopManager().setShopItems(holder.name(), inventory);
-            ChatUtil.setShopItems(player);
+            ChatUtil.showMessage(player, ChatUtil.SET_SHOP_ITEMS);
             SoundUtil.playNoteBlockBell(player);
 
         } catch (ShopException ex) {
-            ChatUtil.showErrorMessage(player, ex.getMessage());
+            ChatUtil.showMessage(player, ex.getMessage());
         }
     }
 }
