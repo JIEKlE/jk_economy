@@ -108,9 +108,7 @@ public class ChatUtil {
     }
 
     public static void broadcastPriceChanged(String shopName) {
-        Bukkit.broadcastMessage("");
         Bukkit.broadcastMessage(getSpeakerPrefix()  + ChatColor.AQUA + "[" + shopName + "]" + ChatColor.WHITE + "의 시세가 변경되었습니다 !");
-        Bukkit.broadcastMessage("");
     }
 
     /* feedback */
