@@ -52,6 +52,7 @@ public class ShopManager {
     }
 
     private void loadShops() {
+        shopMap.clear();
         File file = new File(plugin.getDataFolder(), CONFIG_FILE_NAME);
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         ConfigurationSection shopSection = config.getConfigurationSection(CONFIG_PREFIX);
@@ -219,10 +220,10 @@ public class ShopManager {
             lore.add("");
         }
 
-        lore.add(ChatColor.DARK_GRAY + "좌클릭 : 구매");
-        lore.add(ChatColor.DARK_GRAY + "우클릭 : 판매");
-        lore.add(ChatColor.DARK_GRAY + "shift + 좌클릭 : 64개 구매 or 전체 수량");
-        lore.add(ChatColor.DARK_GRAY + "shift + 우클릭 : 64개 판매 or 전체 판매");
+        lore.add(ChatColor.GRAY + "\uA012 : 구매");
+        lore.add(ChatColor.GRAY + "\uA013 : 판매");
+        lore.add(ChatColor.GRAY + "\uA011 + \uA012 : 64개 구매 or 전체 수량");
+        lore.add(ChatColor.GRAY + "\uA011 + \uA013 : 64개 판매 or 전체 판매");
 
         return lore;
     }
@@ -233,7 +234,7 @@ public class ShopManager {
             buyPrice += " " + formatFluctuation(item.getBuyFluctuationPercent());
         }
 
-        return ChatColor.LIGHT_PURPLE + "구매가격" + ChatColor.WHITE + " : " + buyPrice;
+        return ChatColor.YELLOW + "구매가격" + ChatColor.WHITE + " : " + buyPrice;
     }
 
     private String buildSellPriceLore(ShopItem item, ShopType type) {
@@ -242,17 +243,17 @@ public class ShopManager {
             sellPrice += " " + formatFluctuation(item.getSellFluctuationPercent());
         }
 
-        return ChatColor.AQUA + "판매가격" + ChatColor.WHITE + " : " + sellPrice;
+        return ChatColor.GOLD + "판매가격" + ChatColor.WHITE + " : " + sellPrice;
     }
 
     private String buildOneStackBuyPrice(ShopItem item) {
         String buyPrice = (item.getCurrentBuyPrice() > 0) ? NumberUtil.getFormattedMoney(item.getCurrentBuyPrice() * 64) : "구매금지";
-        return ChatColor.LIGHT_PURPLE + "64개 구매가격" + ChatColor.WHITE + " : " + buyPrice;
+        return ChatColor.YELLOW + "64개 구매가격" + ChatColor.WHITE + " : " + buyPrice;
     }
 
     private String buildOneStackSellPrice(ShopItem item) {
         String sellPrice = (item.getCurrentSellPrice() > 0) ? NumberUtil.getFormattedMoney(item.getCurrentSellPrice() * 64) : "판매금지";
-        return ChatColor.AQUA + "64개 판매가격" + ChatColor.WHITE + " : " + sellPrice;
+        return ChatColor.GOLD + "64개 판매가격" + ChatColor.WHITE + " : " + sellPrice;
     }
 
     private String formatFluctuation(int fluctuation) {
