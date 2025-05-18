@@ -178,8 +178,13 @@ public class MoneyCommand implements CommandExecutor {
             return;
         }
 
-        if(!operation.equals("SET") && amountOfMoney <= 0) {
+        if(operation.equals("SET") && amountOfMoney < 0) {
             ChatUtil.showMessage(sender, ChatUtil.MINUS_MONEY);
+            return;
+        }
+
+        if(!operation.equals("SET") && amountOfMoney <= 0) {
+            ChatUtil.showMessage(sender, ChatUtil.MONEY_LESS_THAN_ONE);
             return;
         }
 

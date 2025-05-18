@@ -17,7 +17,8 @@ public class ChatUtil {
     public static String INTERVAL_NOT_NUMBER = getXPrefix() + "변동 주기는 숫자만 입력 가능합니다.";
     public static String INVENTORY_SIZE_NOT_NUMBER = getXPrefix() + "인벤토리 수는 숫자만 입력 가능합니다.";
 
-    public static String MINUS_MONEY = getXPrefix() + "금액은 0 이상만 입력 가능합니다.";
+    public static String MINUS_MONEY = getXPrefix() + "금액은 음수 입력이 불가합니다.";
+    public static String MONEY_LESS_THAN_ONE = getXPrefix() + "금액은 0 이상만 입력 가능합니다.";
     public static String MINUS_AMOUNT_OF_ITEM = getXPrefix() + "개수는 0 이상만 입력 가능합니다.";
     public static String MINUS_STOCK = getXPrefix() + "재고는 0 이상만 입력 가능합니다.";
     public static String MINUS_FLUCTUATION = getXPrefix() + "변동률은 0 이상만 입력 가능합니다.";
