@@ -26,13 +26,27 @@ public class MoneyTabCompleter implements TabCompleter {
         }
 
         String commandType = args[0];
-        if(length == 2 && commandType.equals("확인")) {
-            if(player.isOp())
+        if(length == 2) {
+            if(commandType.equals("확인") && player.isOp())
                 return NicknameAPI.getInstance().getPlayerNameAndNicknameList();
+
+            if(commandType.equals("송금"))
+                return List.of("금액");
+
+            if((commandType.equals("추가") || commandType.equals("차감") || commandType.equals("설정")) && player.isOp())
+                return List.of("금액");
+
+            if(commandType.equals("순위") && player.isOp())
+                return List.of("페이지수");
         }
 
-        if(length == 3 && !(commandType.equals("순위") || commandType.equals("도움말")))
-            return NicknameAPI.getInstance().getPlayerNameAndNicknameList();
+        if(length == 3) {
+            if(commandType.equals("송금"))
+                return NicknameAPI.getInstance().getPlayerNameAndNicknameList();
+
+            if((commandType.equals("추가") || commandType.equals("차감") || commandType.equals("설정")) && player.isOp())
+                return NicknameAPI.getInstance().getPlayerNameAndNicknameList();
+        }
 
         return Collections.emptyList();
     }
