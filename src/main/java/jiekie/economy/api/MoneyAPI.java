@@ -3,10 +3,7 @@ package jiekie.economy.api;
 import jiekie.economy.manager.MoneyManager;
 import jiekie.economy.util.NumberUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class MoneyAPI {
     private static MoneyAPI instance;
@@ -38,12 +35,13 @@ public class MoneyAPI {
         return NumberUtil.getFormattedMoney(money);
     }
 
-    public List<UUID> getTopRichestPlayers(int count) {
-        List<UUID> uuids = new ArrayList<>();
+    public Map<Integer, UUID> getTopRichestPlayers(int count) {
+        Map<Integer, UUID> uuids = new HashMap<>();
 
+        int index = 0;
         List<Map.Entry<UUID, Integer>> sortedMoneyList = this.moneyManager.getSortedMoneyList();
         for(Map.Entry<UUID, Integer> entry : sortedMoneyList) {
-            uuids.add(entry.getKey());
+            uuids.put(++index, entry.getKey());
             if(uuids.size() >= count) break;
         }
 
